@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+// group =
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jmonkeyengine:jme3-core:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-desktop:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-lwjgl:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-testdata:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-effects:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-networking:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-terrain:3.7.0-stable'
+    implementation 'org.jmonkeyengine:jme3-plugins:3.7.0-stable'
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'ch.qos.logback:logback-classic:1.2.11'
+    implementation 'org.codehaus.groovy:groovy-all:3.0.17'
+    implementation 'com.google.guava:guava:32.1.2-jre'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'main.Main'
+}
+
+// 自定义 sourceSets 配置
+sourceSets {
+    main {
+        java {
+            setSrcDirs(['src']) // 设置源代码目录
+        }
+        resources {
+            setSrcDirs(['assets']) // 将 assets 文件夹作为资源目录
+        }
+    }
+}
