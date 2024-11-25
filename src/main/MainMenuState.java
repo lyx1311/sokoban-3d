@@ -12,7 +12,6 @@ import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class MainMenuState extends BaseAppState {
-
     private Application app;
     private Node guiNode;
     private Container menu;
@@ -43,6 +42,8 @@ public class MainMenuState extends BaseAppState {
         loginButton.setFontSize(24);
         Button registerButton = menu.addChild(new Button("Register"));
         registerButton.setFontSize(24);
+        Button visitorButton = menu.addChild(new Button("Play as Visitor"));
+        visitorButton.setFontSize(18);
         Button exitButton = menu.addChild(new Button("Exit"));
         exitButton.setFontSize(24);
 
@@ -54,6 +55,12 @@ public class MainMenuState extends BaseAppState {
         registerButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new RegisterState()); // 切换到注册状态
+        });
+        visitorButton.addClickCommands(source -> {
+            Main.username = "Visitor"; // 设置用户名
+
+            getStateManager().detach(this); // 移除当前状态
+            getStateManager().attach(new LevelSelectionState()); // 切换到游戏状态
         });
         exitButton.addClickCommands(source -> {
             app.stop(); // 退出游戏

@@ -4,7 +4,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 
 public class Main extends SimpleApplication {
-
     public static String username = "";
 
     public static void main(String[] args) {
@@ -28,8 +27,7 @@ public class Main extends SimpleApplication {
         stateManager.attach(new MainMenuState());
 
         // 初始化相机
-        flyCam.setMoveSpeed(10f);
+        flyCam.setMoveSpeed(50f);
         flyCam.setDragToRotate(true);
     }
-
 }

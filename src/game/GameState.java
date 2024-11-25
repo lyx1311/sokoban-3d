@@ -4,7 +4,6 @@ import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 
 public class GameState extends BaseAppState {
-
     private Application app;
     private int level;
 
@@ -19,7 +18,7 @@ public class GameState extends BaseAppState {
 
     @Override
     public void onEnable() {
-        getStateManager().attach(new CubeState());
+        getStateManager().attach(new CubeState(level));
     }
 
     @Override

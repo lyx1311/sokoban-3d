@@ -1,0 +1,15 @@
+MaterialDef Holy Light {
+
+    MaterialParameters {
+        Color Color (Color)
+    }
+
+    Technique {
+        VertexShader   GLSL100:   MatDefs/Shaders/HolyLight.vert
+        FragmentShader GLSL100:   MatDefs/Shaders/HolyLight.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+    }
+}
