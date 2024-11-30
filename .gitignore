@@ -37,15 +37,6 @@ replay_pid*
 # IntelliJ output
 out/
 
-# Ignore package files
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
 # Ignore IDE-specific files
 *.iws
 .idea/replstate.xml
@@ -55,6 +46,3 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-
-# Keep lib folder
-!lib/
