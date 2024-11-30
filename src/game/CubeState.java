@@ -124,48 +124,27 @@ public class CubeState extends BaseAppState {
     }
 
     private void placeGoal(float x, float z) {
-//        float height = 1000f; // 柱体高度
-//
-//        Material sideMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-//        sideMaterial.setTexture("ColorMap", assetManager.loadTexture("Textures/gradients/yellow_to_white.png")); // 使用渐变纹理
-//        sideMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
-//
-//        // 前面
-//        Geometry front = new Geometry("FrontFace", new Quad(side * 2, height));
-//        front.setMaterial(sideMaterial);
-//        front.rotate(0, 0, 0); // 无需旋转
-//        front.move(x - side, 0, z + side); // 前面矩形
-//        rootNode.attachChild(front);
-//
-//        // 背面
-//        Geometry back = new Geometry("BackFace", new Quad(side * 2, height));
-//        back.setMaterial(sideMaterial);
-//        back.rotate(0, FastMath.PI, 0); // 反向显示
-//        back.move(x + side, 0, z - side); // 背面矩形
-//        rootNode.attachChild(back);
-//
-//        // 左侧面
-//        Geometry left = new Geometry("LeftFace", new Quad(side * 2, height));
-//        left.setMaterial(sideMaterial);
-//        left.rotate(0, -FastMath.HALF_PI, 0); // 左侧矩形
-//        left.move(x - side, 0, z - side); // 位于左边
-//        rootNode.attachChild(left);
-//
-//        // 右侧面
-//        Geometry right = new Geometry("RightFace", new Quad(side * 2, height));
-//        right.setMaterial(sideMaterial);
-//        right.rotate(0, FastMath.HALF_PI, 0); // 右侧矩形
-//        right.move(x + side, 0, z + side); // 位于右边
-//        rootNode.attachChild(right);
+        // 创建一个圆柱体
+        Geometry holyLight = new Geometry("HolyLight", new Box(side, 1000, side));
+
+        // 创建材质
+        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        material.setColor("Color", new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
+        material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
+        holyLight.setMaterial(material); // 设置材质
+        holyLight.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
+
+        holyLight.setLocalTranslation(x, 1000, z); // 设置位置
+        rootNode.attachChild(holyLight); // 添加到场景
 
         // 在地面上对应位置添加一个矩形
-        Geometry ground = new Geometry("Ground", new Quad(side * 2, side * 2));
-        Material groundMaterial = getMaterial(new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
-        groundMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
-        ground.setMaterial(groundMaterial); // 设置材质
-        ground.rotate(-FastMath.HALF_PI, 0, 0); // 平放在地面
-        ground.move(x - side, 0.01f, z + side); // 设置地面矩形位置
-        rootNode.attachChild(ground);
+        Geometry geom = new Geometry("Goal", new Quad(side * 2, side * 2));
+        Material mat = getMaterial(new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
+        geom.setMaterial(material); // 设置材质
+        geom.rotate(-FastMath.HALF_PI, 0, 0);
+        geom.move(x - side, 0.01f, z + side);
+        rootNode.attachChild(geom);
     }
 
     private void initLights() {
@@ -192,7 +171,7 @@ public class CubeState extends BaseAppState {
 
     private void initCamera() {
         SimpleApplication app = (SimpleApplication) getApplication();
-        app.getCamera().setLocation(new Vector3f((heroX * 2 + 1) * side, 5f, -(heroY * 2 + 1) * side));
+        app.getCamera().setLocation(new Vector3f((heroX + 1) * side * 2, 5f, -(heroY + 1) * side * 2));
         app.getCamera().setRotation(new Quaternion(0f, -0.75f, 0f, 0.75f));
         System.out.println(app.getCamera().getLocation());
     }
