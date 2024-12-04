@@ -170,7 +170,15 @@ public class CubeState extends BaseAppState {
             default: throw new IllegalArgumentException("Invalid image name: " + name);
         }
     }
-
+    private Material getMaterial(ColorRGBA color) {
+        Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        mat.setColor("Diffuse", color);
+        mat.setColor("Ambient", color);
+        mat.setColor("Specular", ColorRGBA.White);
+        mat.setFloat("Shininess", 20f);
+        mat.setBoolean("UseMaterialColors", true);
+        return mat;
+    }
     private void placeGoal(float x, float z) {
         // 创建一个圆柱体
         Geometry holyLight = new Geometry("HolyLight", new Box(SIDE, 1000, SIDE));
@@ -229,7 +237,7 @@ public class CubeState extends BaseAppState {
         app.getCamera().setRotation(cameraRotation);
     }
 
-    public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating(); }
+    public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isFlying(); }
 
     @Override
     public void update(float tpf) {
@@ -389,15 +397,9 @@ public class CubeState extends BaseAppState {
         cameraControl.rotateCamera(startRotation, endRotation, ROTATE_DURATION);
     }
 
-    private Material getMaterial(ColorRGBA color) {
-        Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        mat.setColor("Diffuse", color);
-        mat.setColor("Ambient", color);
-        mat.setColor("Specular", ColorRGBA.White);
-        mat.setFloat("Shininess", 20f);
-        mat.setBoolean("UseMaterialColors", true);
-        return mat;
-    }
+    public void startFlying() { cameraControl.startFlying(); }
+
+    public void stopFlying() { cameraControl.stopFlying(); }
 
     @Override
     protected void onEnable() {

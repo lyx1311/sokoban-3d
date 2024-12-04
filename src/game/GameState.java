@@ -34,14 +34,16 @@ public class GameState extends BaseAppState {
         inputManager.addMapping("RotateLeft", new KeyTrigger(KeyInput.KEY_Q));
         inputManager.addMapping("RotateRight", new KeyTrigger(KeyInput.KEY_E));
         inputManager.addMapping("Undo", new KeyTrigger(KeyInput.KEY_U));
+        inputManager.addMapping("Fly", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addListener(actionListener, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight",
-                "PushBox", "RotateLeft", "RotateRight", "Undo");
+                "PushBox", "RotateLeft", "RotateRight", "Undo", "Fly");
     }
 
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
-            if (isPressed && !cubeState.inMotion()) {
+            if (isPressed) {
+                if (cubeState.inMotion()) return;
                 switch (name) {
                     case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
                         cubeState.move(name);
@@ -58,9 +60,14 @@ public class GameState extends BaseAppState {
                     case "Undo":
                         cubeState.undo();
                         break;
+                    case "Fly":
+                        cubeState.startFlying();
+                        break;
                 }
                 System.out.println("Camera position: " + app.getCamera().getLocation());
                 System.out.println("Camera rotation: " + app.getCamera().getRotation());
+            } else {
+                if (name.equals("Fly")) cubeState.stopFlying();
             }
         }
     };

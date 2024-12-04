@@ -10,25 +10,41 @@ public class CameraControl extends AbstractControl {
     private Vector3f startPosition, endPosition;
     private Quaternion startRotation, endRotation;
     private float duration, elapsed;
-    private boolean isMoving, isRotating;
+    private boolean isMoving = false, isRotating = false, isFlying = false;
+    private Vector3f originLocation;
+    private Quaternion originRotation;
 
     public final boolean isMoving() { return isMoving; }
     public final boolean isRotating() { return isRotating; }
+    public final boolean isFlying() { return isFlying; }
 
     public void moveCamera(Vector3f startPosition, Vector3f endPosition, float duration) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.duration = duration;
-        this.elapsed = 0;
-        this.isMoving = true;
+        elapsed = 0;
+        isMoving = true;
     }
 
     public void rotateCamera(Quaternion startRotation, Quaternion endRotation, float duration) {
         this.startRotation = startRotation;
         this.endRotation = endRotation;
         this.duration = duration;
-        this.elapsed = 0;
-        this.isRotating = true;
+        elapsed = 0;
+        isRotating = true;
+    }
+
+    public void startFlying() {
+        originLocation = spatial.getLocalTranslation().clone();
+        originRotation = spatial.getLocalRotation().clone();
+        isFlying = true;
+        spatial.setLocalTranslation(new Vector3f(77.87959f, 122.350235f, 51.420307f));
+        spatial.setLocalRotation(new Quaternion(-0.0010890292f, 0.9283413f, -0.37171733f, -0.0027197748f));
+    }
+    public void stopFlying() {
+        spatial.setLocalTranslation(originLocation);
+        spatial.setLocalRotation(originRotation);
+        isFlying = false;
     }
 
     @Override
