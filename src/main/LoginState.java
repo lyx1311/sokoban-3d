@@ -62,8 +62,7 @@ public class LoginState extends BaseAppState {
             if (authenticateUser(username, password)) {
                 getStateManager().attach(new AlertState(
                         "Login Successful",
-                        "Welcome, " + username + "!",
-                        null
+                        "Welcome, " + username + "!"
                 ));
                 checkArchive(username); // 检查用户存档
 
@@ -74,8 +73,7 @@ public class LoginState extends BaseAppState {
             } else {
                 getStateManager().attach(new AlertState(
                         "Login Failed",
-                        "Invalid username or password!",
-                        null
+                        "Invalid username or password!"
                 ));
             }
         });

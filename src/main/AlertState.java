@@ -20,7 +20,6 @@ public class AlertState extends BaseAppState {
     private Application app;
     private String title;
     private String message;
-    private Runnable onDismiss; // 回调函数
     private Container alertBox;
     private Node guiNode;
     private Geometry background; // 全屏背景遮挡层
@@ -29,10 +28,9 @@ public class AlertState extends BaseAppState {
     private float timer = 0;  // 用于计时
     private final float maxTime = 5.0f; // 自动关闭的时间（秒）
 
-    public AlertState(String title, String message, Runnable onDismiss) {
+    public AlertState(String title, String message) {
         this.title = title;
         this.message = message;
-        this.onDismiss = onDismiss;
     }
 
     @Override
@@ -147,7 +145,6 @@ public class AlertState extends BaseAppState {
 
     @Override
     protected void onDisable() {
-        if (onDismiss != null) onDismiss.run(); // 执行回调
         background.removeFromParent(); // 移除全屏背景
         alertBox.removeFromParent(); // 移除弹框
         app.getInputManager().removeRawInputListener(inputInterceptor); // 移除输入监听

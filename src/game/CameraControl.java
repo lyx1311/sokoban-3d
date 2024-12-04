@@ -7,7 +7,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
 
 public class CameraControl extends AbstractControl {
-    private static final float MOVE_SPEED = 20f;
+    private static final float FLY_CAM_MOVE_SPEED = 50f;
 
     private Vector3f startPosition, endPosition, originLocation, moveDirection = null;
     private Quaternion startRotation, endRotation, originRotation;
@@ -72,7 +72,7 @@ public class CameraControl extends AbstractControl {
         }
 
         if (moveDirection != null) {
-            spatial.move(moveDirection.mult(MOVE_SPEED * tpf));
+            spatial.move(moveDirection.mult(FLY_CAM_MOVE_SPEED * tpf));
         }
     }
 

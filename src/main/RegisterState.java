@@ -73,49 +73,42 @@ public class RegisterState extends BaseAppState {
                 getStateManager().attach(new AlertState(
                         "Registration Failed",
                         "Username must be between " + MIN_USERNAME_LENGTH + " and " +
-                        MAX_USERNAME_LENGTH + " characters!",
-                        null
+                        MAX_USERNAME_LENGTH + " characters!"
                 ));
             } else if (!isUsernameValid(username)) {
                 getStateManager().attach(new AlertState(
                         "Registration Failed",
                         "Username must start with a letter or underscore, and only " +
-                        "contain letters, digits, and underscores.",
-                        null
+                        "contain letters, digits, and underscores."
                 ));
             } else if (isUserExists(username) || username.equals("Visitor")) {
                 getStateManager().attach(new AlertState(
                         "Registration Failed",
-                        "Username already exists!",
-                        null
+                        "Username already exists!"
                 ));
             } else if (!password.equals(confirmPassword)) {
                 getStateManager().attach(new AlertState(
                         "Registration Failed",
-                        "Passwords do not match!",
-                        null
+                        "Passwords do not match!"
                 ));
             } else if (password.length() < MIN_PASSWORD_LENGTH || password.length() > MAX_PASSWORD_LENGTH) {
                 getStateManager().attach(new AlertState(
                         "Registration Failed",
                         "Password must be between " + MIN_PASSWORD_LENGTH + " and " +
-                        MAX_PASSWORD_LENGTH + " characters!",
-                        null
+                        MAX_PASSWORD_LENGTH + " characters!"
                 ));
             } else if (!isPasswordValid(password)) {
                 getStateManager().attach(new AlertState(
                         "Registration Failed",
                         "Password must contain at least two of the following: " +
-                        "lowercase letters, uppercase letters, digits, and special characters.",
-                        null
+                        "lowercase letters, uppercase letters, digits, and special characters."
                 ));
             } else {
                 try {
                     saveUser(username, password);
                     getStateManager().attach(new AlertState(
                             "Registration Successful",
-                            "User registered successfully!",
-                            null
+                            "User registered successfully!"
                     ));
                     createUserArchive(username);
 

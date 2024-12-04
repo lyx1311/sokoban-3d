@@ -1,7 +1,7 @@
 package game;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -25,8 +25,11 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
+import main.AlertState;
+import main.Main;
 
 public class CubeState extends BaseAppState {
+    private static final String ARCHIVE_FILE_PATH = "archives/";
     private static final String MAP_FILE_PATH = "assets/maps/";
     private static final String IMAGE_PATH = "images/";
     private static final float EPS = 1e-3f;
@@ -45,14 +48,14 @@ public class CubeState extends BaseAppState {
     private FilterState filterState;
     private int level, rows, cols, heroX, heroY;
     private char[][] map = null;
-    private HashSet<Integer> goals = new HashSet<>();
     private Node rootNode = new Node("Scene Root");
     private AmbientLight ambientLight; // 环境光
     private PointLight pointLight; // 点光源
     private DirectionalLight sunLight; // 太阳光
     private Node cameraNode;
     private CameraControl cameraControl;
-    private HashMap<Integer, Geometry> cubes = new HashMap<>();
+    private HashMap<Integer, Geometry> boxes = new HashMap<>();
+    private HashSet<Integer> goals = new HashSet<>();
     private String steps = new String();
     private SSAOFilter ssao = new SSAOFilter(7f, 14f, 0.4f, 0.6f); // 屏幕空间环境光遮蔽
 
@@ -79,11 +82,21 @@ public class CubeState extends BaseAppState {
         rootNode.attachChild(cameraNode);
 
         // 初始化场景
+        initSky();
         initFloor();
         initCubes();
         initLights();
-        initSky();
+        load();
         initCamera();
+    }
+
+    private void initSky() {
+        Spatial sky = SkyFactory.createSky(
+                assetManager,
+                "Scenes/Beach/FullskiesSunset0068.dds",
+                SkyFactory.EnvMapType.CubeMap);
+        sky.setLocalScale(350); // 天空盒大小
+        rootNode.attachChild(sky);
     }
 
     private void initFloor() {
@@ -132,7 +145,7 @@ public class CubeState extends BaseAppState {
     }
 
     private void placeBox(int x, int y) {
-        cubes.put(hashId(x, y), placeCube((x + 1) * SIDE * 2, SIDE * 0.6f, -(y + 1) * SIDE * 2,
+        boxes.put(hashId(x, y), placeCube((x + 1) * SIDE * 2, SIDE * 0.6f, -(y + 1) * SIDE * 2,
                 SIDE * 0.6f, "Box"));
     }
     private void placeWall(int x, int y) {
@@ -216,37 +229,15 @@ public class CubeState extends BaseAppState {
         sunLight.setColor(new ColorRGBA(0.6f, 0.6f, 0.6f, 1f));
     }
 
-    private void initSky() {
-        Spatial sky = SkyFactory.createSky(
-                assetManager,
-                "Scenes/Beach/FullskiesSunset0068.dds",
-                SkyFactory.EnvMapType.CubeMap);
-        sky.setLocalScale(350); // 天空盒大小
-        rootNode.attachChild(sky);
-    }
+    private Vector3f hero() { return new Vector3f((heroX + 1) * SIDE * 2, SIDE, -(heroY + 1) * SIDE * 2); }
 
     private void initCamera() {
-        SimpleApplication app = (SimpleApplication) getApplication();
-        Vector3f cameraPosition = new Vector3f((heroX + 1) * SIDE * 2, SIDE, -(heroY + 1) * SIDE * 2);
-        Quaternion cameraRotation = new Quaternion(0f, 0.75f, 0f, 0.75f);
-
-        cameraNode.setLocalTranslation(cameraPosition);
-        cameraNode.setLocalRotation(cameraRotation);
-
-        app.getCamera().setLocation(cameraPosition);
-        app.getCamera().setRotation(cameraRotation);
+        cameraNode.setLocalTranslation(hero());
+        cameraNode.setLocalRotation(new Quaternion(0f, 0.75f, 0f, 0.75f));
     }
 
-    public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating(); }
+    private boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating(); }
     public boolean isFlying() { return cameraControl.isFlying(); }
-
-    @Override
-    public void update(float tpf) {
-        super.update(tpf);
-        // 同步摄像机位置和旋转
-        app.getCamera().setLocation(cameraNode.getWorldTranslation());
-        app.getCamera().setRotation(cameraNode.getWorldRotation());
-    }
 
     private static boolean isParallel(Vector3f v1, Vector3f v2) {
         return v1.cross(v2).lengthSquared() < EPS && v1.dot(v2) > 0;
@@ -265,15 +256,15 @@ public class CubeState extends BaseAppState {
     }
     private static Vector3f charToDir(char c) {
         switch (Character.toLowerCase(c)) {
-            case 'u': return UNIT_U;
-            case 'd': return UNIT_D;
-            case 'l': return UNIT_L;
-            case 'r': return UNIT_R;
+            case 'u': return UNIT_U.clone();
+            case 'd': return UNIT_D.clone();
+            case 'l': return UNIT_L.clone();
+            case 'r': return UNIT_R.clone();
             default: throw new IllegalArgumentException("Invalid direction: " + c);
         }
     }
     private Vector3f strToDir(String instruction) {
-        Vector3f direction = app.getCamera().getDirection().mult(2 * SIDE);
+        Vector3f direction = app.getCamera().getDirection().clone();
         switch (instruction) {
             case "MoveForward": return direction;
             case "MoveBackward": return direction.negate();
@@ -283,9 +274,12 @@ public class CubeState extends BaseAppState {
         }
     }
 
-    public void move(String instruction) {
-        Vector3f direction = strToDir(instruction);
-        Vector3f startPosition = app.getCamera().getLocation().clone();
+    public void moveHero(String instruction) { moveHero(strToDir(instruction), true); }
+    private void moveHero(Vector3f direction, boolean showAnimation) {
+        if (inMotion() || isFlying()) return;
+
+        direction.multLocal(2 * SIDE);
+        Vector3f startPosition = hero();
         Vector3f endPosition = startPosition.add(direction);
 
         int x = heroX + Math.round(direction.x / (2 * SIDE));
@@ -294,7 +288,7 @@ public class CubeState extends BaseAppState {
         // 判断是否可以移动
         if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] == '#' || map[x][y] == 'B') return;
 
-        cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
 
         // 更新英雄位置
         heroX = x;
@@ -304,9 +298,15 @@ public class CubeState extends BaseAppState {
         steps += dirToChar(direction);
     }
 
-    public void pushBox() {
-        Vector3f direction = app.getCamera().getDirection().mult(2 * SIDE);
-        Vector3f startPosition = app.getCamera().getLocation().clone();
+    public void pushBox() { pushBox(app.getCamera().getDirection().clone(), true); }
+    private void pushBox(Vector3f direction, boolean showAnimation) {
+        if (inMotion() || isFlying()) {
+            System.out.println("Reject pushBox: In motion or flying");
+            return;
+        }
+
+        direction.multLocal(2 * SIDE);
+        Vector3f startPosition = hero();
         Vector3f endPosition = startPosition.add(direction);
 
         int x = heroX + Math.round(direction.x / (2 * SIDE));
@@ -322,15 +322,16 @@ public class CubeState extends BaseAppState {
         if (bx < 0 || bx >= rows || by < 0 || by >= cols || map[bx][by] == '#' || map[bx][by] == 'B') return;
 
         // 移动箱子
-        if (!cubes.containsKey(hashId(x, y))) {
+        if (!boxes.containsKey(hashId(x, y))) {
             throw new IllegalArgumentException("Cube not found at (" + bx + ", " + by + ")");
         } else {
-            cubes.get(hashId(x, y)).move(direction);
-            cubes.put(hashId(bx, by), cubes.remove(hashId(x, y)));
+            boxes.get(hashId(x, y)).move(direction);
+            boxes.put(hashId(bx, by), boxes.remove(hashId(x, y)));
+            System.out.println("Move box: " + x + ", " + y + " -> " + bx + ", " + by);
         }
 
         // 移动相机
-        cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
 
         // 更新英雄位置
         heroX = x;
@@ -345,7 +346,7 @@ public class CubeState extends BaseAppState {
     }
 
     public void undo() {
-        if (steps.isEmpty()) return;
+        if (inMotion() || isFlying() || steps.isEmpty()) return;
 
         char c = steps.charAt(steps.length() - 1);
         steps = steps.substring(0, steps.length() - 1);
@@ -366,12 +367,12 @@ public class CubeState extends BaseAppState {
             int by = heroY - Math.round(boxDirection.z / (2 * SIDE));
 
             // 移动箱子
-            if (!cubes.containsKey(hashId(bx, by))) {
+            if (!boxes.containsKey(hashId(bx, by))) {
                 throw new IllegalArgumentException("Cube not found at (" + bx + ", " + by + ") when undoing");
             } else {
-                cubes.get(hashId(bx, by)).move(direction);
+                boxes.get(hashId(bx, by)).move(direction);
                 System.out.println("Move box: " + bx + ", " + by + " -> " + heroX + ", " + heroY);
-                cubes.put(hashId(heroX, heroY), cubes.remove(hashId(bx, by)));
+                boxes.put(hashId(heroX, heroY), boxes.remove(hashId(bx, by)));
             }
 
             // 更新地图
@@ -385,6 +386,8 @@ public class CubeState extends BaseAppState {
     }
 
     public void rotateCamera(float angle) {
+        if (inMotion() || isFlying()) return;
+
         Quaternion startRotation = app.getCamera().getRotation().clone();
         Quaternion endRotation = startRotation.mult(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * angle, Vector3f.UNIT_Y));
 
@@ -408,9 +411,95 @@ public class CubeState extends BaseAppState {
     }
     public void stopMoveFlyCam() { cameraControl.stopMoveFlyCam(); }
 
+    public void restart() {
+        if (inMotion() || isFlying()) return;
+
+        for (Spatial child : rootNode.getChildren()) {
+            if (child instanceof Geometry) rootNode.detachChild(child);
+        }
+        boxes.clear();
+        goals.clear();
+        steps = new String();
+
+        initSky();
+        initFloor();
+        initCubes();
+        initCamera();
+    }
+
+    public void save() {
+        if (inMotion()) return;
+
+        // 打开存档文件
+        File archiveFile = new File(ARCHIVE_FILE_PATH + Main.username + "_archive.txt");
+
+        // 读取文件内容到列表
+        ArrayList<String> lines = new ArrayList<>();
+        try (Scanner scanner = new Scanner(archiveFile)) {
+            while (scanner.hasNextLine()) lines.add(scanner.nextLine());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+
+            // 创建存档文件
+            try {
+                archiveFile.createNewFile();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        // 确保列表至少有 level 行，不足的用空行补齐
+        while (lines.size() < level) lines.add("");
+
+        // 修改第k行
+        lines.set(level - 1, steps);
+
+        // 将修改后的内容写回文件
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(archiveFile))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        getStateManager().attach(new AlertState(
+                "Game Saved",
+                "The game has been saved successfully."
+        ));
+    }
+
+    public void load() {
+        if (Main.username.equals("Visitor")) return;
+
+        // 打开存档文件
+        File archiveFile = new File(ARCHIVE_FILE_PATH + Main.username + "_archive.txt");
+
+        // 读取第 level 行
+        int linesRead = 0;
+        String line = null;
+        try (Scanner scanner = new Scanner(archiveFile)) {
+            while (scanner.hasNextLine() && linesRead < level) {
+                line = scanner.nextLine();
+                linesRead++;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // 恢复游戏状态
+        if(linesRead == level) {
+            for (char c : line.toCharArray()) {
+                if (Character.isLowerCase(c)) moveHero(charToDir(c), false);
+                else pushBox(charToDir(c), false);
+            }
+        }
+    }
+
     @Override
     protected void onEnable() {
-        SimpleApplication app = (SimpleApplication) getApplication();
+        SimpleApplication app = (SimpleApplication) this.app;
 
         app.getRootNode().attachChild(rootNode);
         app.getRootNode().addLight(ambientLight);
@@ -420,6 +509,14 @@ public class CubeState extends BaseAppState {
         filterState = new FilterState();
         filterState.add(ssao);
         getStateManager().attach(filterState);
+    }
+
+    @Override
+    public void update(float tpf) {
+        super.update(tpf);
+        // 同步摄像机位置和旋转
+        app.getCamera().setLocation(cameraNode.getWorldTranslation());
+        app.getCamera().setRotation(cameraNode.getWorldRotation());
     }
 
 //    @Override
@@ -433,7 +530,7 @@ public class CubeState extends BaseAppState {
 
     @Override
     protected void onDisable() {
-        SimpleApplication app = (SimpleApplication) getApplication();
+        SimpleApplication app = (SimpleApplication) this.app;
 
         app.getRootNode().detachChild(rootNode);
         app.getRootNode().removeLight(ambientLight);

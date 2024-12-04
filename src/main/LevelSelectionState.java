@@ -67,9 +67,11 @@ public class LevelSelectionState extends BaseAppState {
             });
         }
 
-        Button backButton = levelSelectionForm.addChild(new Button("Back"));
+        Button backButton = levelSelectionForm.addChild(new Button("Log Out and Back"));
         backButton.setFontSize(24);
         backButton.addClickCommands(source -> {
+            Main.username = ""; // 重置用户名
+
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new MainMenuState()); // 切换到 MainMenuState
         });
