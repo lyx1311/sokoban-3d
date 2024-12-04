@@ -73,7 +73,7 @@ public class GameState extends BaseAppState {
 
     @Override
     public void onDisable() {
-        getStateManager().detach(getStateManager().getState(CubeState.class));
+        getStateManager().detach(cubeState);
     }
 
     @Override

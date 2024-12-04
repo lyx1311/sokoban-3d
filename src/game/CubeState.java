@@ -16,6 +16,7 @@ import com.jme3.material.RenderState;
 import com.jme3.math.*;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
+import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -44,22 +45,24 @@ public class CubeState extends BaseAppState {
     private static final Vector3f UNIT_D = new Vector3f(1f, 0f, 0f);
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
     private static final Vector3f UNIT_R = new Vector3f(0f, 0f, -1f);
+    private static final Vector3f pointLightPos = new Vector3f(100, 200, 100);
+    private static final Vector3f sunLightDir = new Vector3f(-0.65f, -0.12f, 0.75f);
 
     private Application app;
     private AssetManager assetManager;
+    private FilterState filterState;
     private int level, rows, cols, heroX, heroY;
     private char[][] map = null;
     private HashSet<Integer> goals = new HashSet<>();
     private Node rootNode = new Node("Scene Root");
     private AmbientLight ambientLight; // 环境光
     private PointLight pointLight; // 点光源
-    private final Vector3f pointLightPos = new Vector3f(100, 200, 100);
     private DirectionalLight sunLight; // 太阳光
-    private final Vector3f sunLightDir = new Vector3f(-0.65f, -0.12f, 0.75f);
     private Node cameraNode;
     private CameraControl cameraControl;
     private HashMap<Integer, Geometry> cubes = new HashMap<>();
     private String steps = new String();
+    private SSAOFilter ssao = new SSAOFilter(7f, 14f, 0.4f, 0.6f); // 屏幕空间环境光遮蔽
 
     public CubeState(int level) {
         this.level = level;
@@ -308,8 +311,6 @@ public class CubeState extends BaseAppState {
         steps += dirToChar(direction);
     }
 
-
-
     public void pushBox() {
         Vector3f direction = app.getCamera().getDirection().clone().multLocal(2 * SIDE);
         Vector3f startPosition = app.getCamera().getLocation().clone();
@@ -414,6 +415,10 @@ public class CubeState extends BaseAppState {
         app.getRootNode().addLight(ambientLight);
         // app.getRootNode().addLight(pointLight);
         app.getRootNode().addLight(sunLight);
+
+        filterState = new FilterState();
+        filterState.add(ssao);
+        getStateManager().attach(filterState);
     }
 
 //    @Override
@@ -433,6 +438,8 @@ public class CubeState extends BaseAppState {
         app.getRootNode().removeLight(ambientLight);
         app.getRootNode().removeLight(pointLight);
         app.getRootNode().removeLight(sunLight);
+
+        getStateManager().detach(filterState);
     }
 
     @Override
