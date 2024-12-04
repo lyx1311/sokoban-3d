@@ -17,7 +17,6 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class AlertState extends BaseAppState {
-
     private Application app;
     private String title;
     private String message;

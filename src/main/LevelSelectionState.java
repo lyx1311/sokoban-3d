@@ -14,6 +14,8 @@ import com.simsilica.lemur.style.BaseStyles;
 import game.GameState;
 
 public class LevelSelectionState extends BaseAppState {
+    private static final int LEVEL_COUNT = 8;
+
     private Application app;
     private Node guiNode;
     private Container levelSelectionForm;
@@ -42,7 +44,7 @@ public class LevelSelectionState extends BaseAppState {
         levelSelectionForm.addChild(new Label("Hello, " + Main.username + "!")).setFontSize(24);
         levelSelectionForm.addChild(new Label("Select a level:")).setFontSize(24);
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= LEVEL_COUNT; i++) {
             Button levelButton = levelSelectionForm.addChild(new Button("Level " + i));
             levelButton.setFontSize(24);
             final int level = i;
