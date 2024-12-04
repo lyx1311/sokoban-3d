@@ -46,28 +46,27 @@ public class GameState extends BaseAppState {
                 if (cubeState.inMotion()) return;
                 switch (name) {
                     case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
-                        cubeState.move(name);
+                        System.out.println(" > " + name);
+                        if (cubeState.isFlying()) cubeState.startMoveFlyCam(name);
+                        else cubeState.move(name);
                         break;
-                    case "PushBox":
-                        cubeState.pushBox();
-                        break;
-                    case "RotateLeft":
-                        cubeState.rotateCamera(90);
-                        break;
-                    case "RotateRight":
-                        cubeState.rotateCamera(-90);
-                        break;
-                    case "Undo":
-                        cubeState.undo();
-                        break;
-                    case "Fly":
-                        cubeState.startFlying();
-                        break;
+                    case "Fly": cubeState.reverseFly(); break;
+                }
+                if (cubeState.isFlying()) return;
+                switch (name) {
+                    case "PushBox": cubeState.pushBox(); break;
+                    case "RotateLeft": cubeState.rotateCamera(90); break;
+                    case "RotateRight": cubeState.rotateCamera(-90); break;
+                    case "Undo": cubeState.undo(); break;
                 }
                 System.out.println("Camera position: " + app.getCamera().getLocation());
                 System.out.println("Camera rotation: " + app.getCamera().getRotation());
             } else {
-                if (name.equals("Fly")) cubeState.stopFlying();
+                switch (name) {
+                    case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
+                        if (cubeState.isFlying()) cubeState.stopMoveFlyCam();
+                        break;
+                }
             }
         }
     };

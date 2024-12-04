@@ -237,7 +237,8 @@ public class CubeState extends BaseAppState {
         app.getCamera().setRotation(cameraRotation);
     }
 
-    public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isFlying(); }
+    public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating(); }
+    public boolean isFlying() { return cameraControl.isFlying(); }
 
     @Override
     public void update(float tpf) {
@@ -271,27 +272,19 @@ public class CubeState extends BaseAppState {
             default: throw new IllegalArgumentException("Invalid direction: " + c);
         }
     }
+    private Vector3f strToDir(String instruction) {
+        Vector3f direction = app.getCamera().getDirection().mult(2 * SIDE);
+        switch (instruction) {
+            case "MoveForward": return direction;
+            case "MoveBackward": return direction.negate();
+            case "MoveLeft": return new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(direction);
+            case "MoveRight":return new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y).mult(direction);
+            default: throw new IllegalArgumentException("Invalid moving instruction: " + instruction);
+        }
+    }
 
     public void move(String instruction) {
-        Vector3f cameraDirection = app.getCamera().getDirection().clone().multLocal(2 * SIDE);
-        Vector3f direction;
-        switch (instruction) {
-            case "MoveForward":
-                direction = cameraDirection;
-                break;
-            case "MoveBackward":
-                direction = cameraDirection.negate();
-                break;
-            case "MoveLeft":
-                direction = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(cameraDirection);
-                break;
-            case "MoveRight":
-                direction = new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y).mult(cameraDirection);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid moving instruction: " + instruction);
-        }
-
+        Vector3f direction = strToDir(instruction);
         Vector3f startPosition = app.getCamera().getLocation().clone();
         Vector3f endPosition = startPosition.add(direction);
 
@@ -312,7 +305,7 @@ public class CubeState extends BaseAppState {
     }
 
     public void pushBox() {
-        Vector3f direction = app.getCamera().getDirection().clone().multLocal(2 * SIDE);
+        Vector3f direction = app.getCamera().getDirection().mult(2 * SIDE);
         Vector3f startPosition = app.getCamera().getLocation().clone();
         Vector3f endPosition = startPosition.add(direction);
 
@@ -356,7 +349,7 @@ public class CubeState extends BaseAppState {
 
         char c = steps.charAt(steps.length() - 1);
         steps = steps.substring(0, steps.length() - 1);
-        Vector3f direction = charToDir(c).negate().multLocal(2 * SIDE);
+        Vector3f direction = charToDir(c).negate().mult(2 * SIDE);
         Vector3f startPosition = app.getCamera().getLocation().clone();
         Vector3f endPosition = startPosition.add(direction);
 
@@ -368,7 +361,7 @@ public class CubeState extends BaseAppState {
         cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
 
         if (Character.isUpperCase(c)) {
-            Vector3f boxDirection = charToDir(c).multLocal(2 * SIDE);
+            Vector3f boxDirection = charToDir(c).mult(2 * SIDE);
             int bx = heroX + Math.round(boxDirection.x / (2 * SIDE));
             int by = heroY - Math.round(boxDirection.z / (2 * SIDE));
 
@@ -376,8 +369,9 @@ public class CubeState extends BaseAppState {
             if (!cubes.containsKey(hashId(bx, by))) {
                 throw new IllegalArgumentException("Cube not found at (" + bx + ", " + by + ") when undoing");
             } else {
-                cubes.get(hashId(bx, by)).move(direction.negate());
-                cubes.put(hashId(x, y), cubes.remove(hashId(bx, by)));
+                cubes.get(hashId(bx, by)).move(direction);
+                System.out.println("Move box: " + bx + ", " + by + " -> " + heroX + ", " + heroY);
+                cubes.put(hashId(heroX, heroY), cubes.remove(hashId(bx, by)));
             }
 
             // 更新地图
@@ -397,9 +391,22 @@ public class CubeState extends BaseAppState {
         cameraControl.rotateCamera(startRotation, endRotation, ROTATE_DURATION);
     }
 
-    public void startFlying() { cameraControl.startFlying(); }
-
-    public void stopFlying() { cameraControl.stopFlying(); }
+    public void reverseFly() {
+        if (cameraControl.isFlying()) cameraControl.stopFly();
+        else cameraControl.startFly();
+    }
+    public void startMoveFlyCam(String instruction) {
+        Vector3f direction;
+        switch (instruction) {
+            case "MoveForward": direction = UNIT_R; break;
+            case "MoveBackward": direction = UNIT_L; break;
+            case "MoveLeft": direction = UNIT_U; break;
+            case "MoveRight": direction = UNIT_D; break;
+            default: throw new IllegalArgumentException("Invalid fly cam instruction: " + instruction);
+        }
+        cameraControl.startMoveFlyCam(direction);
+    }
+    public void stopMoveFlyCam() { cameraControl.stopMoveFlyCam(); }
 
     @Override
     protected void onEnable() {
