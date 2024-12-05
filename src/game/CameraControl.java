@@ -17,6 +17,7 @@ public class CameraControl extends AbstractControl {
     public final boolean isMoving() { return isMoving; }
     public final boolean isRotating() { return isRotating; }
     public final boolean isFlying() { return isFlying; }
+    public final boolean isMovingFlyCam() { return moveDirection != null; }
 
     public void moveCamera(Vector3f startPosition, Vector3f endPosition, float duration) {
         this.startPosition = startPosition;

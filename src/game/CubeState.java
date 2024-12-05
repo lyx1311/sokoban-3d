@@ -233,7 +233,7 @@ public class CubeState extends BaseAppState {
         cameraNode.setLocalRotation(new Quaternion(0f, 0.75f, 0f, 0.75f));
     }
 
-    private boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating(); }
+    public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isMovingFlyCam(); }
     public boolean isFlying() { return cameraControl.isFlying(); }
 
     private static boolean isParallel(Vector3f v1, Vector3f v2) {
@@ -301,6 +301,8 @@ public class CubeState extends BaseAppState {
             System.out.println("Reject pushBox: In motion or flying");
             return;
         }
+
+        System.out.println("Push box: " + direction);
 
         direction.multLocal(2 * SIDE);
         Vector3f startPosition = hero();
@@ -392,6 +394,7 @@ public class CubeState extends BaseAppState {
     }
 
     public void reverseFly() {
+        if (inMotion()) return;
         if (cameraControl.isFlying()) cameraControl.stopFly();
         else cameraControl.startFly();
     }
