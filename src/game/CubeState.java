@@ -50,7 +50,6 @@ public class CubeState extends BaseAppState {
     private char[][] map = null;
     private Node rootNode = new Node("Scene Root");
     private AmbientLight ambientLight; // 环境光
-    private PointLight pointLight; // 点光源
     private DirectionalLight sunLight; // 太阳光
     private Node cameraNode;
     private CameraControl cameraControl;
@@ -152,7 +151,7 @@ public class CubeState extends BaseAppState {
         placeCube((x + 1) * SIDE * 2, SIDE, -(y + 1) * SIDE * 2, SIDE, "Wall");
     }
     private void placeGoal(int x, int y) {
-        placeGoal((x + 1) * SIDE * 2, -(y + 1) * SIDE * 2);
+        placeGoal((x + 1) * SIDE * 2, SIDE * 0.99f, -(y + 1) * SIDE * 2, SIDE * 0.99f);
     }
 
     private int hashId(int x, int y) { return x * cols + y; }
@@ -183,21 +182,22 @@ public class CubeState extends BaseAppState {
             default: throw new IllegalArgumentException("Invalid image name: " + name);
         }
     }
-    private Material getMaterial(ColorRGBA color) {
-        Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-        mat.setColor("Diffuse", color);
-        mat.setColor("Ambient", color);
-        mat.setColor("Specular", ColorRGBA.White);
-        mat.setFloat("Shininess", 20f);
-        mat.setBoolean("UseMaterialColors", true);
-        return mat;
-    }
-    private void placeGoal(float x, float z) {
-        // 创建一个圆柱体
-        Geometry holyLight = new Geometry("HolyLight", new Box(SIDE, 1000, SIDE));
+//    private Material getMaterial(ColorRGBA color) {
+//        Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+//        mat.setColor("Diffuse", color);
+//        mat.setColor("Ambient", color);
+//        mat.setColor("Specular", ColorRGBA.White);
+//        mat.setFloat("Shininess", 20f);
+//        mat.setBoolean("UseMaterialColors", true);
+//        return mat;
+//    }
+    private void placeGoal(float x, float y, float z, float side) {
+        // 创建一个柱体
+        Geometry holyLight = new Geometry("HolyLight", new Box(side, 1000, side));
 
         // 创建材质
         Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        material.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off); // 禁用背面剔除
         material.setColor("Color", new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
         material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
         holyLight.setMaterial(material); // 设置材质
@@ -207,22 +207,19 @@ public class CubeState extends BaseAppState {
         rootNode.attachChild(holyLight); // 添加到场景
 
         // 在地面上对应位置添加一个矩形
-        Geometry geom = new Geometry("Goal", new Quad(SIDE * 2, SIDE * 2));
-        Material mat = getMaterial(new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
-        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
-        geom.setMaterial(material); // 设置材质
-        geom.rotate(-FastMath.HALF_PI, 0, 0);
-        geom.move(x - SIDE, 0.01f, z + SIDE);
-        rootNode.attachChild(geom);
+//        Geometry geom = new Geometry("Goal", new Quad(side * 2, side * 2));
+//        Material mat = getMaterial(new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
+//        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
+//        geom.setMaterial(material); // 设置材质
+//        geom.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
+//        geom.rotate(-FastMath.HALF_PI, 0, 0);
+//        geom.move(x - side, 0.1f, z + side);
+//        rootNode.attachChild(geom);
     }
 
     private void initLights() {
         ambientLight = new AmbientLight();
         ambientLight.setColor(new ColorRGBA(0.4f, 0.4f, 0.4f, 1f));
-
-        pointLight = new PointLight();
-        pointLight.setPosition(pointLightPos);
-        pointLight.setRadius(1000);
 
         sunLight = new DirectionalLight();
         sunLight.setDirection(sunLightDir);
@@ -503,7 +500,6 @@ public class CubeState extends BaseAppState {
 
         app.getRootNode().attachChild(rootNode);
         app.getRootNode().addLight(ambientLight);
-        // app.getRootNode().addLight(pointLight);
         app.getRootNode().addLight(sunLight);
 
         filterState = new FilterState();
@@ -514,6 +510,7 @@ public class CubeState extends BaseAppState {
     @Override
     public void update(float tpf) {
         super.update(tpf);
+
         // 同步摄像机位置和旋转
         app.getCamera().setLocation(cameraNode.getWorldTranslation());
         app.getCamera().setRotation(cameraNode.getWorldRotation());
@@ -534,7 +531,6 @@ public class CubeState extends BaseAppState {
 
         app.getRootNode().detachChild(rootNode);
         app.getRootNode().removeLight(ambientLight);
-        app.getRootNode().removeLight(pointLight);
         app.getRootNode().removeLight(sunLight);
 
         getStateManager().detach(filterState);
