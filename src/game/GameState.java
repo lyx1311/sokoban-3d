@@ -53,7 +53,7 @@ public class GameState extends BaseAppState {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
             if (isPressed) {
-                if (name.equals("OpenMenu") && !cubeState.inMotion() && !cubeState.isFlying()) {
+                if (name.equals("OpenMenu") && !cubeState.inMotion()) {
                     if (isMenuOpen) {
                         getStateManager().detach(menuState);
                         isMenuOpen = false;

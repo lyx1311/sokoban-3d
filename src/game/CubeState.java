@@ -57,6 +57,7 @@ public class CubeState extends BaseAppState {
     private HashSet<Integer> goals = new HashSet<>();
     private String steps = new String();
     private SSAOFilter ssao = new SSAOFilter(7f, 14f, 0.4f, 0.6f); // 屏幕空间环境光遮蔽
+    private boolean isWin = false;
 
     public CubeState(int level) {
         this.level = level;
@@ -155,8 +156,8 @@ public class CubeState extends BaseAppState {
     }
 
     private int hashId(int x, int y) { return x * cols + y; }
-    // private int hashX(int id) { return id / cols; }
-    // private int hashY(int id) { return id % cols; }
+    private int hashX(int id) { return id / cols; }
+    private int hashY(int id) { return id % cols; }
 
     private Geometry placeCube(float x, float y, float z, float side, String name) {
         Geometry geom = new Geometry(name, new Box(side, side, side));
@@ -273,7 +274,7 @@ public class CubeState extends BaseAppState {
 
     public void moveHero(String instruction) { moveHero(strToDir(instruction), true); }
     private void moveHero(Vector3f direction, boolean showAnimation) {
-        if (inMotion() || isFlying()) return;
+        if (inMotion() || isFlying() || isWin) return;
 
         direction.multLocal(2 * SIDE);
         Vector3f startPosition = hero();
@@ -292,15 +293,12 @@ public class CubeState extends BaseAppState {
         heroY = y;
 
         // 存档
-        steps += dirToChar(direction);
+        if (!checkWin()) steps += dirToChar(direction);
     }
 
     public void pushBox() { pushBox(app.getCamera().getDirection().clone(), true); }
     private void pushBox(Vector3f direction, boolean showAnimation) {
-        if (inMotion() || isFlying()) {
-            System.out.println("Reject pushBox: In motion or flying");
-            return;
-        }
+        if (inMotion() || isFlying() || isWin) return;
 
         System.out.println("Push box: " + direction);
 
@@ -341,11 +339,28 @@ public class CubeState extends BaseAppState {
         map[bx][by] = 'B';
 
         // 存档
-        steps += Character.toUpperCase(dirToChar(direction));
+        if (!checkWin()) steps += Character.toUpperCase(dirToChar(direction));
+    }
+
+    private boolean checkWin() {
+        for (int id : goals) {
+            int x = hashX(id), y = hashY(id);
+            if (map[x][y] != 'B') return false;
+        }
+
+        getStateManager().attach(new AlertState(
+                "Congratulations!",
+                "You have completed level " + level + "!"
+        ));
+
+        save();
+        isWin = true;
+
+        return true;
     }
 
     public void undo() {
-        if (inMotion() || isFlying() || steps.isEmpty()) return;
+        if (inMotion() || isFlying() || isWin || steps.isEmpty()) return;
 
         char c = steps.charAt(steps.length() - 1);
         steps = steps.substring(0, steps.length() - 1);
@@ -385,7 +400,7 @@ public class CubeState extends BaseAppState {
     }
 
     public void rotateCamera(float angle) {
-        if (inMotion() || isFlying()) return;
+        if (inMotion() || isFlying() || isWin) return;
 
         Quaternion startRotation = app.getCamera().getRotation().clone();
         Quaternion endRotation = startRotation.mult(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * angle, Vector3f.UNIT_Y));
@@ -394,7 +409,7 @@ public class CubeState extends BaseAppState {
     }
 
     public void reverseFly() {
-        if (inMotion()) return;
+        if (inMotion() || isWin) return;
         if (cameraControl.isFlying()) cameraControl.stopFly();
         else cameraControl.startFly();
     }
@@ -517,6 +532,9 @@ public class CubeState extends BaseAppState {
         // 同步摄像机位置和旋转
         app.getCamera().setLocation(cameraNode.getWorldTranslation());
         app.getCamera().setRotation(cameraNode.getWorldRotation());
+
+        // 检查胜利后的飞行
+        if (isWin && !inMotion() && !cameraControl.isFlying()) cameraControl.startFly();
     }
 
 //    @Override
