@@ -32,10 +32,10 @@ public class CubeState extends BaseAppState {
     private static final String ARCHIVE_FILE_PATH = "archives/";
     private static final String MAP_FILE_PATH = "assets/maps/";
     private static final String IMAGE_PATH = "images/";
-    private static final float EPS = 1e-3f;
+    private static final float EPS = 1e-4f;
     private static final float SIDE = 10f;
-    private static final float MOVE_DURATION = 1.0f;
-    private static final float ROTATE_DURATION = 0.5f;
+    private static final float MOVE_DURATION = 0.8f;
+    private static final float ROTATE_DURATION = 1.0f;
     private static final Vector3f UNIT_U = new Vector3f(-1f, 0f, 0f);
     private static final Vector3f UNIT_D = new Vector3f(1f, 0f, 0f);
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
@@ -261,8 +261,7 @@ public class CubeState extends BaseAppState {
             default: throw new IllegalArgumentException("Invalid direction: " + c);
         }
     }
-    private Vector3f strToDir(String instruction) {
-        Vector3f direction = app.getCamera().getDirection().clone();
+    private Vector3f strToDir(Vector3f direction, String instruction) {
         switch (instruction) {
             case "MoveForward": return direction;
             case "MoveBackward": return direction.negate();
@@ -272,7 +271,9 @@ public class CubeState extends BaseAppState {
         }
     }
 
-    public void moveHero(String instruction) { moveHero(strToDir(instruction), true); }
+    public void moveHero(String instruction) {
+        moveHero(strToDir(app.getCamera().getDirection().clone(), instruction), true);
+    }
     private void moveHero(Vector3f direction, boolean showAnimation) {
         if (inMotion() || isFlying() || isWin) return;
 
@@ -400,12 +401,22 @@ public class CubeState extends BaseAppState {
     }
 
     public void rotateCamera(float angle) {
-        if (inMotion() || isFlying() || isWin) return;
+        if (inMotion() || isWin) return;
 
-        Quaternion startRotation = app.getCamera().getRotation().clone();
-        Quaternion endRotation = startRotation.mult(new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * angle, Vector3f.UNIT_Y));
+        // 获取当前相机的水平旋转角度
+        Quaternion currentRotation = app.getCamera().getRotation();
+        float[] angles = new float[3];
+        currentRotation.toAngles(angles);
+        float currentYaw = angles[1]; // 获取水平旋转角度（Yaw）
 
-        cameraControl.rotateCamera(startRotation, endRotation, ROTATE_DURATION);
+        // 计算新的水平旋转角度
+        float newYaw = currentYaw + FastMath.DEG_TO_RAD * angle;
+
+        // 创建新的旋转四元数，仅改变水平旋转角度
+        Quaternion newRotation = new Quaternion().fromAngles(angles[0], newYaw, angles[2]);
+
+        // 应用新的旋转角度到相机
+        cameraControl.rotateCamera(currentRotation, newRotation, ROTATE_DURATION);
     }
 
     public void reverseFly() {
@@ -414,15 +425,9 @@ public class CubeState extends BaseAppState {
         else cameraControl.startFly();
     }
     public void startMoveFlyCam(String instruction) {
-        Vector3f direction;
-        switch (instruction) {
-            case "MoveForward": direction = UNIT_R; break;
-            case "MoveBackward": direction = UNIT_L; break;
-            case "MoveLeft": direction = UNIT_U; break;
-            case "MoveRight": direction = UNIT_D; break;
-            default: throw new IllegalArgumentException("Invalid fly cam instruction: " + instruction);
-        }
-        cameraControl.startMoveFlyCam(direction);
+        Vector3f direction = app.getCamera().getDirection().clone();
+        direction.y = 0;
+        cameraControl.startMoveFlyCam(strToDir(direction, instruction));
     }
     public void stopMoveFlyCam() { cameraControl.stopMoveFlyCam(); }
 

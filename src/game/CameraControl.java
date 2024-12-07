@@ -7,6 +7,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
 
 public class CameraControl extends AbstractControl {
+    private static final float EPS = 1e-6f;
     private static final float FLY_CAM_MOVE_SPEED = 50f;
 
     private Vector3f startPosition, endPosition, originLocation, moveDirection = null;
@@ -53,6 +54,9 @@ public class CameraControl extends AbstractControl {
     }
     public void stopMoveFlyCam() { moveDirection = null; }
 
+    private static boolean isEqual(Vector3f a, Vector3f b) { return a.cross(b).lengthSquared() < EPS; }
+    private static boolean isEqual(Quaternion a, Quaternion b) { return a.dot(b) > 1 - EPS; }
+
     @Override
     protected void controlUpdate(float tpf) {
         if (isMoving) {
@@ -60,7 +64,10 @@ public class CameraControl extends AbstractControl {
             float t = Math.min(elapsed / duration, 1);
             Vector3f currentPosition = startPosition.interpolateLocal(endPosition, t);
             spatial.setLocalTranslation(currentPosition);
-            if (currentPosition.equals(endPosition)) isMoving = false;
+            if (isEqual(currentPosition, endPosition)) {
+                spatial.setLocalTranslation(endPosition);
+                isMoving = false;
+            }
         }
 
         if (isRotating) {
@@ -69,7 +76,10 @@ public class CameraControl extends AbstractControl {
             Quaternion currentRotation = new Quaternion();
             currentRotation.slerp(startRotation, endRotation, t);
             spatial.setLocalRotation(currentRotation);
-            if (currentRotation.equals(endRotation)) isRotating = false;
+            if (isEqual(currentRotation, endRotation)) {
+                spatial.setLocalRotation(endRotation);
+                isRotating = false;
+            }
         }
 
         if (moveDirection != null) {
