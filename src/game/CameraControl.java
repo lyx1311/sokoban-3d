@@ -7,8 +7,8 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
 
 public class CameraControl extends AbstractControl {
-    private static final float EPS = 1e-6f;
-    private static final float FLY_CAM_MOVE_SPEED = 50f;
+    private static final float EPS = 1e-4f;
+    private static final float FLY_CAM_MOVE_SPEED = 80f;
 
     private Vector3f startPosition, endPosition, originLocation, moveDirection = null;
     private Quaternion startRotation, endRotation, originRotation;
@@ -40,18 +40,15 @@ public class CameraControl extends AbstractControl {
         originLocation = spatial.getLocalTranslation().clone();
         originRotation = spatial.getLocalRotation().clone();
         isFlying = true;
-        spatial.setLocalTranslation(new Vector3f(77.87959f, 122.350235f, 51.420307f));
-        spatial.setLocalRotation(new Quaternion(-0.0010890292f, 0.9283413f, -0.37171733f, -0.0027197748f));
+        spatial.setLocalTranslation(new Vector3f(60f, 120f, 60f));
+        spatial.setLocalRotation(new Quaternion(0f, 0.93f, -0.37f, 0f));
     }
     public void stopFly() {
         spatial.setLocalTranslation(originLocation);
         spatial.setLocalRotation(originRotation);
         isFlying = false;
     }
-    public void startMoveFlyCam(Vector3f direction) {
-        stopMoveFlyCam(); moveDirection = direction;
-        System.out.println(" * Move direction: " + moveDirection);
-    }
+    public void startMoveFlyCam(Vector3f direction) { moveDirection = direction; }
     public void stopMoveFlyCam() { moveDirection = null; }
 
     private static boolean isEqual(Vector3f a, Vector3f b) { return a.cross(b).lengthSquared() < EPS; }
@@ -78,6 +75,7 @@ public class CameraControl extends AbstractControl {
             spatial.setLocalRotation(currentRotation);
             if (isEqual(currentRotation, endRotation)) {
                 spatial.setLocalRotation(endRotation);
+                System.out.println(" * Camera direction: " + spatial.getLocalTranslation());
                 isRotating = false;
             }
         }

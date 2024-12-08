@@ -35,12 +35,11 @@ public class CubeState extends BaseAppState {
     private static final float EPS = 1e-4f;
     private static final float SIDE = 10f;
     private static final float MOVE_DURATION = 0.8f;
-    private static final float ROTATE_DURATION = 1.0f;
+    private static final float ROTATE_DURATION = 1.5f;
     private static final Vector3f UNIT_U = new Vector3f(-1f, 0f, 0f);
     private static final Vector3f UNIT_D = new Vector3f(1f, 0f, 0f);
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
     private static final Vector3f UNIT_R = new Vector3f(0f, 0f, -1f);
-    private static final Vector3f pointLightPos = new Vector3f(100, 200, 100);
     private static final Vector3f sunLightDir = new Vector3f(-0.65f, -0.12f, 0.75f);
 
     private Application app;
@@ -59,9 +58,7 @@ public class CubeState extends BaseAppState {
     private SSAOFilter ssao = new SSAOFilter(7f, 14f, 0.4f, 0.6f); // 屏幕空间环境光遮蔽
     private boolean isWin = false;
 
-    public CubeState(int level) {
-        this.level = level;
-    }
+    public CubeState(int level) { this.level = level; }
 
     @Override
     protected void initialize(Application app) {
@@ -237,6 +234,12 @@ public class CubeState extends BaseAppState {
     public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isMovingFlyCam(); }
     public boolean isFlying() { return cameraControl.isFlying(); }
 
+    private static Vector3f trim(Vector3f v) {
+        if (Math.abs(v.x) < 0.1f) v.x = 0;
+        if (Math.abs(v.y) < 0.1f) v.y = 0;
+        if (Math.abs(v.z) < 0.1f) v.z = 0;
+        return v;
+    }
     private static boolean isParallel(Vector3f v1, Vector3f v2) {
         return v1.cross(v2).lengthSquared() < EPS && v1.dot(v2) > 0;
     }
@@ -263,10 +266,10 @@ public class CubeState extends BaseAppState {
     }
     private Vector3f strToDir(Vector3f direction, String instruction) {
         switch (instruction) {
-            case "MoveForward": return direction;
-            case "MoveBackward": return direction.negate();
-            case "MoveLeft": return new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(direction);
-            case "MoveRight":return new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y).mult(direction);
+            case "MoveForward": return trim(direction);
+            case "MoveBackward": return trim(direction.negate());
+            case "MoveLeft": return trim(new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(direction));
+            case "MoveRight":return trim(new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y).mult(direction));
             default: throw new IllegalArgumentException("Invalid moving instruction: " + instruction);
         }
     }
@@ -432,7 +435,8 @@ public class CubeState extends BaseAppState {
     public void stopMoveFlyCam() { cameraControl.stopMoveFlyCam(); }
 
     public void restart() {
-        if (inMotion() || isFlying()) return;
+        if (inMotion()) return;
+        if (isFlying()) reverseFly();
 
         for (Spatial child : rootNode.getChildren()) {
             if (child instanceof Geometry) rootNode.detachChild(child);
