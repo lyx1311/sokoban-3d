@@ -121,6 +121,7 @@ public class LoginState extends BaseAppState {
     @Override
     public void onEnable() {
         guiNode.attachChild(loginForm); // 将表单添加到 GUI 节点
+        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -129,6 +130,7 @@ public class LoginState extends BaseAppState {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
         loginForm.removeFromParent(); // 将表单从 GUI 节点移除
+        Main.removeBackground(); // 删除背景图片
     }
 
     @Override

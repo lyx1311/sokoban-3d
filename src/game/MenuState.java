@@ -54,6 +54,14 @@ public class MenuState extends BaseAppState {
         });
 
         if (!Main.username.equals("Visitor")) {
+            Button loadButton = menu.addChild(new Button("Load"));
+            loadButton.setFontSize(24);
+            loadButton.addClickCommands(source -> {
+                cubeState.load();
+                getStateManager().detach(this);
+                gameState.setMenuOpen(false);
+            });
+
             Button saveButton = menu.addChild(new Button("Save"));
             saveButton.setFontSize(24);
             saveButton.addClickCommands(source -> {

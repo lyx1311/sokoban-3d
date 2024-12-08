@@ -49,19 +49,6 @@ public class LevelSelectionState extends BaseAppState {
             levelButton.setFontSize(24);
             final int level = i;
             levelButton.addClickCommands(source -> {
-                // 删除背景图片
-                boolean foundBackground = false;
-                for (Spatial child : guiNode.getChildren()) {
-                    if (child.getName() != null && child.getName().equals("Background")) {
-                        foundBackground = true;
-                        child.removeFromParent();
-                        break;
-                    }
-                }
-                if (!foundBackground) {
-                    System.err.println("Background not found when switching to GameState.");
-                }
-
                 getStateManager().detach(this); // 移除当前状态
                 getStateManager().attach(new GameState(level)); // 切换到 GameState
             });
@@ -83,6 +70,7 @@ public class LevelSelectionState extends BaseAppState {
     @Override
     public void onEnable() {
         guiNode.attachChild(levelSelectionForm); // 将菜单添加到 GUI 节点
+        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -91,6 +79,7 @@ public class LevelSelectionState extends BaseAppState {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
         levelSelectionForm.removeFromParent(); // 将菜单从 GUI 节点移除
+        Main.removeBackground(); // 移除背景图片
     }
 
     @Override

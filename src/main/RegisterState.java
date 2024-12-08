@@ -235,6 +235,7 @@ public class RegisterState extends BaseAppState {
     @Override
     public void onEnable() {
         guiNode.attachChild(registerForm); // 将表单添加到 GUI 节点
+        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -243,6 +244,7 @@ public class RegisterState extends BaseAppState {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
         registerForm.removeFromParent(); // 将表单从 GUI 节点移除
+        Main.removeBackground(); // 删除背景图片
     }
 
     @Override

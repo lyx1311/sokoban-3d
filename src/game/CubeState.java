@@ -83,7 +83,6 @@ public class CubeState extends BaseAppState {
         initFloor();
         initCubes();
         initLights();
-        load();
         initCamera();
     }
 
@@ -139,6 +138,9 @@ public class CubeState extends BaseAppState {
             case ' ': break;
             default: throw new IllegalArgumentException("Invalid map data at (" + x + ", " + y + "): " + map[x][y]);
         }
+
+        if (boxes.size() != goals.size()) throw new IllegalArgumentException("Number of boxes (" + boxes.size() +
+                ") does not match number of goals (" + goals.size() + ")");
     }
 
     private void placeBox(int x, int y) {
@@ -280,7 +282,7 @@ public class CubeState extends BaseAppState {
 
         moveHero(strToDir(app.getCamera().getDirection().clone(), instruction), true);
     }
-    private void moveHero(Vector3f direction, boolean showAnimation) {
+    private boolean moveHero(Vector3f direction, boolean showAnimation) {
         if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
 
         Vector3f startPosition = hero();
@@ -290,7 +292,7 @@ public class CubeState extends BaseAppState {
         int y = heroY - Math.round(direction.z);
 
         // 判断是否可以移动
-        if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] == '#' || map[x][y] == 'B') return;
+        if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] == '#' || map[x][y] == 'B') return false;
 
         if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
 
@@ -301,6 +303,8 @@ public class CubeState extends BaseAppState {
         // 检查胜利并存档
         checkWin();
         steps += dirToChar(direction);
+
+        return true;
     }
 
     public void pushBox() {
@@ -309,7 +313,7 @@ public class CubeState extends BaseAppState {
 
         pushBox(trim(app.getCamera().getDirection().clone()), true);
     }
-    private void pushBox(Vector3f direction, boolean showAnimation) {
+    private boolean pushBox(Vector3f direction, boolean showAnimation) {
         if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
 
         System.out.println("Push box: " + direction);
@@ -321,13 +325,13 @@ public class CubeState extends BaseAppState {
         int y = heroY - Math.round(direction.z);
 
         // 判断是否可以推箱子
-        if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] != 'B') return;
+        if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] != 'B') return false;
 
         int bx = heroX + Math.round(2 * direction.x);
         int by = heroY - Math.round(2 * direction.z);
 
         // 判断箱子是否可以移动
-        if (bx < 0 || bx >= rows || by < 0 || by >= cols || map[bx][by] == '#' || map[bx][by] == 'B') return;
+        if (bx < 0 || bx >= rows || by < 0 || by >= cols || map[bx][by] == '#' || map[bx][by] == 'B') return false;
 
         // 移动箱子
         if (!boxes.containsKey(hashId(x, y))) {
@@ -352,6 +356,8 @@ public class CubeState extends BaseAppState {
         // 检查胜利并存档
         checkWin();
         steps += Character.toUpperCase(dirToChar(direction));
+
+        return true;
     }
 
     private void checkWin() {
@@ -504,7 +510,15 @@ public class CubeState extends BaseAppState {
         ));
     }
 
-    private void load() {
+    private boolean tryLoad (String s) {
+        restart();
+        for (char c : s.toCharArray()) {
+            if(!(Character.isLowerCase(c) ? moveHero(charToDir(c), false) :
+                    pushBox(charToDir(c), false))) return false;
+        }
+        return true;
+    }
+    public void load() {
         if (Main.username.equals("Visitor")) return;
 
         // 打开存档文件
@@ -512,7 +526,7 @@ public class CubeState extends BaseAppState {
 
         // 读取第 level 行
         int linesRead = 0;
-        String line = null;
+        String line = new String();
         try (Scanner scanner = new Scanner(archiveFile)) {
             while (scanner.hasNextLine() && linesRead < level) {
                 line = scanner.nextLine();
@@ -523,18 +537,32 @@ public class CubeState extends BaseAppState {
         }
 
         // 恢复游戏状态
-        if (linesRead == level) {
-            for (char c : line.toCharArray()) {
-                if (Character.isLowerCase(c)) moveHero(charToDir(c), false);
-                else pushBox(charToDir(c), false);
+        if (linesRead == level && !line.isEmpty()) {
+            String preivousSteps = steps;
+            steps = new String();
+
+            if (tryLoad(line)) {
+                getStateManager().attach(new AlertState(
+                        "Game Loaded",
+                        "The archive has been loaded successfully."
+                ));
+
+                checkWin();
+            } else {
+                getStateManager().attach(new AlertState(
+                        "Invalid Archive",
+                        "The archive for level " + level + " is invalid."
+                ));
+
+                if(!tryLoad(preivousSteps)) throw new IllegalStateException("Invalid previous steps: " + preivousSteps);
             }
 
-            if (!line.isEmpty()) getStateManager().attach(new AlertState(
-                    "Game Loaded",
-                    "The archive has been loaded successfully."
+            initCamera();
+        } else {
+            getStateManager().attach(new AlertState(
+                    "No Archive",
+                    "No archive found for " + Main.username + " at level " + level + "."
             ));
-
-            checkWin();
         }
     }
 

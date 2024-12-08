@@ -31,9 +31,6 @@ public class MainMenuState extends BaseAppState {
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
         initGui();
-
-        // 创建全屏背景遮挡层
-        createBackground();
     }
 
     private void initGui() {
@@ -70,26 +67,10 @@ public class MainMenuState extends BaseAppState {
         menu.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);
     }
 
-    private void createBackground() {
-        float width = app.getCamera().getWidth();
-        float height = app.getCamera().getHeight();
-
-        // 创建 Picture 对象
-        backgroundImage = new Picture("Background");
-        backgroundImage.setImage(app.getAssetManager(), "bg.jpg", false); // 替换为你的图片路径
-        backgroundImage.setWidth(width);
-        backgroundImage.setHeight(height);
-
-        // 设置位置，确保背景图片在最底层
-        backgroundImage.setLocalTranslation(0, 0, 0);
-
-        // 将背景添加到 GUI 节点
-        guiNode.attachChild(backgroundImage);
-    }
-
     @Override
     public void onEnable() {
         guiNode.attachChild(menu); // 将菜单添加到 GUI 节点
+        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -98,6 +79,7 @@ public class MainMenuState extends BaseAppState {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
         menu.removeFromParent(); // 将菜单从 GUI 节点移除
+        Main.removeBackground(); // 删除背景图片
     }
 
     @Override
