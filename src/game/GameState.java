@@ -1,5 +1,8 @@
 package game;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -15,6 +18,7 @@ public class GameState extends BaseAppState {
     private CubeState cubeState;
     private MenuState menuState;
     private boolean isMenuOpen = false;
+    private Queue<String> instructions = new LinkedList<>();
 
     public GameState(int level) {
         this.level = level;
@@ -29,6 +33,9 @@ public class GameState extends BaseAppState {
     }
 
     public void setMenuOpen(boolean isMenuOpen) { this.isMenuOpen = isMenuOpen; }
+    public void assertInstructionsCleared() {
+        if (!instructions.isEmpty()) throw new IllegalStateException("Instructions queue is not empty");
+    }
 
     private void initInput() {
         // 移除空格键的默认映射
@@ -69,14 +76,22 @@ public class GameState extends BaseAppState {
                 switch (name) {
                     case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
                         System.out.println(" > " + name);
-                        if (cubeState.isFlying()) cubeState.startMoveFlyCam(name);
-                        else cubeState.moveHero(name);
+                        if (cubeState.isFlying()) {
+                            cubeState.startMoveFlyCam(name);
+                        } else {
+                            instructions.add(name);
+                        }
                         break;
-                    case "PushBox": cubeState.pushBox(); break;
-                    case "RotateLeft": cubeState.rotateCamera(90); break;
-                    case "RotateRight": cubeState.rotateCamera(-90); break;
-                    case "Undo": cubeState.undo(); break;
-                    case "Fly": cubeState.reverseFly(); break;
+                    case "RotateLeft": case "RotateRight":
+                        if (cubeState.isFlying()) {
+                            if (!cubeState.inMotion()) cubeState.rotateCamera(name.equals("RotateLeft") ? 90 : -90);
+                        } else {
+                            instructions.add(name);
+                        }
+                        break;
+                    case "PushBox": case "Undo": case "Fly":
+                        instructions.add(name);
+                        break;
                 }
                 System.out.println("Camera position: " + app.getCamera().getLocation());
                 System.out.println("Camera rotation: " + app.getCamera().getRotation());
@@ -94,6 +109,23 @@ public class GameState extends BaseAppState {
     public void onEnable() {
         cubeState = new CubeState(level);
         getStateManager().attach(cubeState);
+    }
+
+    @Override
+    public void update(float tpf) {
+        if (!instructions.isEmpty() && !cubeState.inMotion()) {
+            String instruction = instructions.poll();
+            switch (instruction) {
+                case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
+                    cubeState.moveHero(instruction);
+                    break;
+                case "PushBox": cubeState.pushBox(); break;
+                case "RotateLeft": cubeState.rotateCamera(90); break;
+                case "RotateRight": cubeState.rotateCamera(-90); break;
+                case "Undo": cubeState.undo(); break;
+                case "Fly": cubeState.reverseFly(); break;
+            }
+        }
     }
 
     @Override

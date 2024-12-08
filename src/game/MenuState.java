@@ -48,6 +48,7 @@ public class MenuState extends BaseAppState {
         restartButton.setFontSize(24);
         restartButton.addClickCommands(source -> {
             cubeState.restart();
+            gameState.assertInstructionsCleared();
             getStateManager().detach(this);
             gameState.setMenuOpen(false);
         });
