@@ -33,9 +33,18 @@ public class GameState extends BaseAppState {
         initInput();
     }
 
-    public void setMenuOpen(boolean isMenuOpen) { this.isMenuOpen = isMenuOpen; }
     public boolean isSolving() { return isSolving; }
     public boolean isWorking() { return cubeState.inMotion() || !instructions.isEmpty(); }
+
+    public void openMenu() {
+        menuState = new MenuState(this, cubeState, level);
+        getStateManager().attach(menuState);
+        isMenuOpen = true;
+    }
+    public void closeMenu() {
+        getStateManager().detach(menuState);
+        isMenuOpen = false;
+    }
 
     public void startSolving() {
         isSolving = true;
@@ -66,11 +75,11 @@ public class GameState extends BaseAppState {
         inputManager.addMapping("PushBox", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addMapping("RotateLeft", new KeyTrigger(KeyInput.KEY_Q));
         inputManager.addMapping("RotateRight", new KeyTrigger(KeyInput.KEY_E));
-        inputManager.addMapping("Undo", new KeyTrigger(KeyInput.KEY_U));
         inputManager.addMapping("Fly", new KeyTrigger(KeyInput.KEY_L));
+        inputManager.addMapping("Undo", new KeyTrigger(KeyInput.KEY_U));
         inputManager.addMapping("OpenMenu", new KeyTrigger(KeyInput.KEY_ESCAPE));
         inputManager.addListener(actionListener, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight",
-                "PushBox", "RotateLeft", "RotateRight", "Undo", "Fly", "OpenMenu");
+                "PushBox", "RotateLeft", "RotateRight", "Fly", "Undo", "OpenMenu");
     }
 
     private final ActionListener actionListener = new ActionListener() {
@@ -79,17 +88,13 @@ public class GameState extends BaseAppState {
             if (isPressed) {
                 if (name.equals("OpenMenu")) {
                     if (isMenuOpen) {
-                        getStateManager().detach(menuState);
-                        isMenuOpen = false;
-                        System.out.println("Close menu");
+                        closeMenu();
                     } else {
-                        menuState = new MenuState(GameState.this, cubeState, level);
-                        getStateManager().attach(menuState);
-                        isMenuOpen = true;
+                        openMenu();
                     }
                     return;
                 }
-                if (isMenuOpen || isSolving) return;
+                if (isSolving) return;
                 switch (name) {
                     case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
                         System.out.println(" > " + name);
@@ -106,7 +111,7 @@ public class GameState extends BaseAppState {
                             instructions.add(name);
                         }
                         break;
-                    case "PushBox": case "Undo": case "Fly":
+                    case "PushBox": case "Fly": case "Undo":
                         instructions.add(name);
                         break;
                 }
@@ -135,12 +140,19 @@ public class GameState extends BaseAppState {
             switch (instruction) {
                 case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
                     cubeState.moveHero(instruction);
+                    if (isMenuOpen) menuState.updateSteps();
                     break;
-                case "PushBox": cubeState.pushBox(); break;
+                case "PushBox":
+                    cubeState.pushBox();
+                    if (isMenuOpen) menuState.updateSteps();
+                    break;
                 case "RotateLeft": cubeState.rotateCamera(90); break;
                 case "RotateRight": cubeState.rotateCamera(-90); break;
-                case "Undo": cubeState.undo(); break;
                 case "Fly": cubeState.reverseFly(); break;
+                case "Undo":
+                    cubeState.undo();
+                    if (isMenuOpen) menuState.updateSteps();
+                    break;
             }
         }
 
@@ -155,8 +167,14 @@ public class GameState extends BaseAppState {
                 } else {
                     cubeState.moveHero(c);
                 }
+                if (isMenuOpen) menuState.updateSteps();
                 solution.poll();
             }
+        }
+
+        if (cubeState.isWin() && !cubeState.inMotion() && !cubeState.isFlying()) {
+            cubeState.reverseFly();
+            if (isMenuOpen) closeMenu();
         }
     }
 

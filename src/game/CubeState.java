@@ -235,6 +235,7 @@ public class CubeState extends BaseAppState {
     public int getSteps() { return steps.length(); }
     public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isMovingFlyCam(); }
     public boolean isFlying() { return cameraControl.isFlying(); }
+    public boolean isWin() { return isWin; }
 
     private static Vector3f trim(Vector3f v) {
         if (Math.abs(v.x) < 0.1f) v.x = 0;
@@ -417,22 +418,27 @@ public class CubeState extends BaseAppState {
         boolean allImmovable = true;
 
         for (Integer id : boxes.keySet()) {
-            int x = hashX(id), y = hashY(id), neighbors = 0, neighborWalls = 0;
+            int x = hashX(id), y = hashY(id);
+            boolean adjacent = false, adjacentWall = false;
             for (int dir = 0; dir < 4; dir++) {
                 int bx = x + dx[dir], by = y + dy[dir];
-                switch (map[bx][by]) {
-                    case '#': neighborWalls++; // 不要 break
-                    case 'B': neighbors++; break;
+                int bbx = x + dx[(dir + 1) % 4], bby = y + dy[(dir + 1) % 4];
+                if ((map[bx][by] == 'B' || map[bx][by] == '#') && (map[bbx][bby] == 'B' || map[bbx][bby] == '#')) {
+                    adjacent = true;
+                    if (map[bx][by] == '#' && map[bbx][bby] == '#') {
+                        adjacentWall = true;
+                        break;
+                    }
                 }
             }
-            if (neighborWalls == 2) {
+            if (adjacentWall && !goals.contains(id)) {
                 getStateManager().attach(new AlertState(
                         "Deadlock Detected",
                         "A box cannot be moved. Press 'U' to undo."
                 ));
                 return;
             }
-            if (neighbors < 2) allImmovable = false;
+            if (!adjacent) allImmovable = false;
         }
 
         if (allImmovable) {
@@ -515,11 +521,13 @@ public class CubeState extends BaseAppState {
     }
 
     public void reverseFly() {
-        if (isWin) return;
         if (inMotion()) throw new IllegalStateException("Camera is in motion.");
 
-        if (cameraControl.isFlying()) cameraControl.stopFly();
-        else cameraControl.startFly();
+        if (isFlying()) {
+            if(!isWin) cameraControl.stopFly();
+        } else {
+            cameraControl.startFly();
+        }
     }
     public void startMoveFlyCam(String instruction) {
         Vector3f direction = app.getCamera().getDirection().clone();
@@ -680,9 +688,6 @@ public class CubeState extends BaseAppState {
         // 同步摄像机位置和旋转
         app.getCamera().setLocation(cameraNode.getWorldTranslation());
         app.getCamera().setRotation(cameraNode.getWorldRotation());
-
-        // 检查胜利后的飞行
-        if (isWin && !inMotion() && !cameraControl.isFlying()) cameraControl.startFly();
     }
 
 //    @Override

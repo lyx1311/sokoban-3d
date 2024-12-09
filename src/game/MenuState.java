@@ -22,6 +22,7 @@ public class MenuState extends BaseAppState {
     private int level;
     private Node guiNode;
     private Container menu;
+    private Label stepsLabel;
 
     public MenuState(GameState gameState, CubeState cubeState, int level) {
         this.gameState = gameState;
@@ -52,14 +53,13 @@ public class MenuState extends BaseAppState {
         Label levelLabel = menu.addChild(new Label("Level " + level));
         levelLabel.setFontSize(30);
 
-        Label stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
+        stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
         stepsLabel.setFontSize(24);
 
         Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
         solveButton.setFontSize(24);
         solveButton.addClickCommands(source -> {
-            getStateManager().detach(this);
-            gameState.setMenuOpen(false);
+            gameState.closeMenu();
 
             if (gameState.isSolving()) {
                 gameState.stopSolving();
@@ -81,8 +81,7 @@ public class MenuState extends BaseAppState {
 
             cubeState.restart();
 
-            getStateManager().detach(this);
-            gameState.setMenuOpen(false);
+            gameState.closeMenu();
         });
 
         if (!Main.username.equals("Visitor")) {
@@ -92,9 +91,7 @@ public class MenuState extends BaseAppState {
                 if(checkWorking()) return;
 
                 cubeState.load();
-
-                getStateManager().detach(this);
-                gameState.setMenuOpen(false);
+                gameState.closeMenu();
             });
 
             Button saveButton = menu.addChild(new Button("Save"));
@@ -103,9 +100,7 @@ public class MenuState extends BaseAppState {
                 if(checkWorking()) return;
 
                 cubeState.save();
-
-                getStateManager().detach(this);
-                gameState.setMenuOpen(false);
+                gameState.closeMenu();
             });
         }
 
@@ -117,22 +112,20 @@ public class MenuState extends BaseAppState {
 
             // if (!Main.username.equals("Visitor")) cubeState.save();
 
-            getStateManager().detach(this); // 移除当前状态
-            gameState.setMenuOpen(false); // 关闭菜单
+            gameState.closeMenu(); // 关闭菜单
             getStateManager().detach(gameState); // 移除游戏状态
             getStateManager().attach(new LevelSelectionState()); // 切换到游戏状态
         });
 
         Button closeButton = menu.addChild(new Button("Close Menu"));
         closeButton.setFontSize(24);
-        closeButton.addClickCommands(source -> {
-            getStateManager().detach(this);
-            gameState.setMenuOpen(false);
-        });
+        closeButton.addClickCommands(source -> gameState.closeMenu());
 
         // 设置窗口位置
         menu.setLocalTranslation(10, app.getCamera().getHeight() - 10, 1);
     }
+
+    public void updateSteps() { stepsLabel.setText("Steps: " + cubeState.getSteps()); }
 
     private boolean checkWorking() {
         if (gameState.isWorking()) {

@@ -26,7 +26,7 @@ public class AlertState extends BaseAppState {
     private RawInputListener inputInterceptor; // 用于监测鼠标输入
 
     private float timer = 0;  // 用于计时
-    private final float maxTime = 5.0f; // 自动关闭的时间（秒）
+    private final float maxTime = 3.0f; // 自动关闭的时间（秒）
 
     public AlertState(String title, String message) {
         this.title = title;
