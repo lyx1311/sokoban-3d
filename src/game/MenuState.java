@@ -10,6 +10,8 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
+
+import main.AlertState;
 import main.LevelSelectionState;
 import main.Main;
 
@@ -53,11 +55,32 @@ public class MenuState extends BaseAppState {
         Label stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
         stepsLabel.setFontSize(24);
 
+        Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
+        solveButton.setFontSize(24);
+        solveButton.addClickCommands(source -> {
+            getStateManager().detach(this);
+            gameState.setMenuOpen(false);
+
+            if (gameState.isSolving()) {
+                gameState.stopSolving();
+            } else {
+                if (checkWorking()) return;
+
+                gameState.startSolving();
+                getStateManager().attach(new AlertState(
+                        "AI Solving",
+                        "Please wait for a moment."
+                ));
+            }
+        });
+
         Button restartButton = menu.addChild(new Button("Restart"));
         restartButton.setFontSize(24);
         restartButton.addClickCommands(source -> {
+            if(checkWorking()) return;
+
             cubeState.restart();
-            gameState.assertInstructionsCleared();
+
             getStateManager().detach(this);
             gameState.setMenuOpen(false);
         });
@@ -66,7 +89,10 @@ public class MenuState extends BaseAppState {
             Button loadButton = menu.addChild(new Button("Load"));
             loadButton.setFontSize(24);
             loadButton.addClickCommands(source -> {
+                if(checkWorking()) return;
+
                 cubeState.load();
+
                 getStateManager().detach(this);
                 gameState.setMenuOpen(false);
             });
@@ -74,7 +100,10 @@ public class MenuState extends BaseAppState {
             Button saveButton = menu.addChild(new Button("Save"));
             saveButton.setFontSize(24);
             saveButton.addClickCommands(source -> {
+                if(checkWorking()) return;
+
                 cubeState.save();
+
                 getStateManager().detach(this);
                 gameState.setMenuOpen(false);
             });
@@ -84,6 +113,8 @@ public class MenuState extends BaseAppState {
         backButton.setFontSize(24);
         if (Main.username.equals("Visitor")) backButton.setText("Back");
         backButton.addClickCommands(source -> {
+            if(checkWorking()) return;
+
             // if (!Main.username.equals("Visitor")) cubeState.save();
 
             getStateManager().detach(this); // 移除当前状态
@@ -101,6 +132,18 @@ public class MenuState extends BaseAppState {
 
         // 设置窗口位置
         menu.setLocalTranslation(10, app.getCamera().getHeight() - 10, 1);
+    }
+
+    private boolean checkWorking() {
+        if (gameState.isWorking()) {
+            getStateManager().attach(new AlertState(
+                    "You Are Moving",
+                    "Please wait for a moment."
+            ));
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

@@ -17,8 +17,9 @@ public class GameState extends BaseAppState {
     private InputManager inputManager;
     private CubeState cubeState;
     private MenuState menuState;
-    private boolean isMenuOpen = false;
+    private boolean isMenuOpen = false, isSolving = false;
     private Queue<String> instructions = new LinkedList<>();
+    private Queue<Character> solution = new LinkedList<>();
 
     public GameState(int level) {
         this.level = level;
@@ -33,8 +34,24 @@ public class GameState extends BaseAppState {
     }
 
     public void setMenuOpen(boolean isMenuOpen) { this.isMenuOpen = isMenuOpen; }
-    public void assertInstructionsCleared() {
-        if (!instructions.isEmpty()) throw new IllegalStateException("Instructions queue is not empty");
+    public boolean isSolving() { return isSolving; }
+    public boolean isWorking() { return cubeState.inMotion() || !instructions.isEmpty(); }
+
+    public void startSolving() {
+        isSolving = true;
+        if (cubeState.isFlying()) cubeState.reverseFly();
+
+        String steps = cubeState.solve();
+        if (steps == null || !isSolving) {
+            stopSolving();
+        } else {
+            System.out.println("Solution: " + steps);
+            for (char step : steps.toCharArray()) solution.add(step);
+        }
+    }
+    public void stopSolving() {
+        isSolving = false;
+        solution.clear();
     }
 
     private void initInput() {
@@ -60,7 +77,7 @@ public class GameState extends BaseAppState {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
             if (isPressed) {
-                if (name.equals("OpenMenu") && !cubeState.inMotion()) {
+                if (name.equals("OpenMenu")) {
                     if (isMenuOpen) {
                         getStateManager().detach(menuState);
                         isMenuOpen = false;
@@ -72,7 +89,7 @@ public class GameState extends BaseAppState {
                     }
                     return;
                 }
-                if (isMenuOpen) return;
+                if (isMenuOpen || isSolving) return;
                 switch (name) {
                     case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
                         System.out.println(" > " + name);
@@ -124,6 +141,21 @@ public class GameState extends BaseAppState {
                 case "RotateRight": cubeState.rotateCamera(-90); break;
                 case "Undo": cubeState.undo(); break;
                 case "Fly": cubeState.reverseFly(); break;
+            }
+        }
+
+        if (isSolving && !isWorking()) {
+            if (solution.isEmpty()) {
+                stopSolving();
+            } else {
+                char c = solution.peek();
+                if (Character.isUpperCase(c)) {
+                    if(cubeState.rotateTo(c)) return;
+                    cubeState.pushBox(c);
+                } else {
+                    cubeState.moveHero(c);
+                }
+                solution.poll();
             }
         }
     }

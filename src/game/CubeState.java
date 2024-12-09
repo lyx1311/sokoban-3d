@@ -12,7 +12,6 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
-import com.jme3.light.PointLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.*;
@@ -246,6 +245,11 @@ public class CubeState extends BaseAppState {
     private static boolean isParallel(Vector3f v1, Vector3f v2) {
         return v1.cross(v2).lengthSquared() < EPS && v1.dot(v2) > 0;
     }
+    private static boolean isSameRotation(Quaternion q1, Quaternion q2) {
+        return q1.mult(Vector3f.UNIT_X).distance(q2.mult(Vector3f.UNIT_X)) < EPS &&
+                q1.mult(Vector3f.UNIT_Y).distance(q2.mult(Vector3f.UNIT_Y)) < EPS &&
+                q1.mult(Vector3f.UNIT_Z).distance(q2.mult(Vector3f.UNIT_Z)) < EPS;
+    }
     private static char dirToChar(Vector3f direction) {
         System.out.println(direction);
         if (isParallel(direction, UNIT_U)) System.out.println("u");
@@ -267,7 +271,16 @@ public class CubeState extends BaseAppState {
             default: throw new IllegalArgumentException("Invalid direction: " + c);
         }
     }
-    private Vector3f strToDir(Vector3f direction, String instruction) {
+    private static Quaternion charToRot(char c) {
+        switch (Character.toLowerCase(c)) {
+            case 'u': return new Quaternion().fromAngles(0, -FastMath.HALF_PI, 0);
+            case 'd': return new Quaternion().fromAngles(0, FastMath.HALF_PI, 0);
+            case 'l': return new Quaternion();
+            case 'r': return new Quaternion().fromAngles(0, FastMath.PI, 0);
+            default: throw new IllegalArgumentException("Invalid direction: " + c);
+        }
+    }
+    private static Vector3f strToDir(Vector3f direction, String instruction) {
         switch (instruction) {
             case "MoveForward": return trim(direction);
             case "MoveBackward": return trim(direction.negate());
@@ -282,6 +295,12 @@ public class CubeState extends BaseAppState {
         if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
 
         moveHero(strToDir(app.getCamera().getDirection().clone(), instruction), true);
+    }
+    public void moveHero(char c) {
+        if (isWin) return;
+        if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
+
+        moveHero(charToDir(c), true);
     }
     private boolean moveHero(Vector3f direction, boolean showAnimation) {
         if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
@@ -314,6 +333,12 @@ public class CubeState extends BaseAppState {
 
         pushBox(trim(app.getCamera().getDirection().clone()), true);
     }
+    public void pushBox(char c) {
+        if (isWin) return;
+        if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
+
+        pushBox(charToDir(c), true);
+    }
     private boolean pushBox(Vector3f direction, boolean showAnimation) {
         if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
 
@@ -326,7 +351,14 @@ public class CubeState extends BaseAppState {
         int y = heroY - Math.round(direction.z);
 
         // 判断是否可以推箱子
-        if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] != 'B') return false;
+        if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] != 'B') {
+            System.out.println("Cannot push box at (" + x + ", " + y + "). rows = " + rows + ", cols = " + cols);
+            for (int id : boxes.keySet()) {
+                int bx = hashX(id), by = hashY(id);
+                System.out.println(" - Box at (" + bx + ", " + by + ")");
+            }
+            return false;
+        }
 
         int bx = heroX + Math.round(2 * direction.x);
         int by = heroY - Math.round(2 * direction.z);
@@ -357,6 +389,7 @@ public class CubeState extends BaseAppState {
         // 检查胜利并存档
         checkWin();
         steps += Character.toUpperCase(dirToChar(direction));
+        checkDeadlock();
 
         return true;
     }
@@ -373,6 +406,41 @@ public class CubeState extends BaseAppState {
         ));
 
         isWin = true;
+    }
+
+    private void checkDeadlock() {
+        if (isWin) return;
+
+        final int dx[] = {0, 1, 0, -1};
+        final int dy[] = {1, 0, -1, 0};
+
+        boolean allImmovable = true;
+
+        for (Integer id : boxes.keySet()) {
+            int x = hashX(id), y = hashY(id), neighbors = 0, neighborWalls = 0;
+            for (int dir = 0; dir < 4; dir++) {
+                int bx = x + dx[dir], by = y + dy[dir];
+                switch (map[bx][by]) {
+                    case '#': neighborWalls++; // 不要 break
+                    case 'B': neighbors++; break;
+                }
+            }
+            if (neighborWalls == 2) {
+                getStateManager().attach(new AlertState(
+                        "Deadlock Detected",
+                        "A box cannot be moved. Press 'U' to undo."
+                ));
+                return;
+            }
+            if (neighbors < 2) allImmovable = false;
+        }
+
+        if (allImmovable) {
+            getStateManager().attach(new AlertState(
+                    "Deadlock Detected",
+                    "All boxes are immovable. Press 'U' to undo."
+            ));
+        }
     }
 
     public void undo() {
@@ -416,6 +484,17 @@ public class CubeState extends BaseAppState {
         heroY = y;
     }
 
+    public boolean rotateTo(char c) {
+        if (inMotion()) throw new IllegalStateException("Camera is in motion.");
+
+        Quaternion currentRotation = app.getCamera().getRotation();
+        Quaternion newRotation = charToRot(c);
+
+        if (isSameRotation(currentRotation, newRotation)) return false;
+
+        cameraControl.rotateCamera(currentRotation, newRotation, ROTATE_DURATION);
+        return true;
+    }
     public void rotateCamera(float angle) {
         if (inMotion()) throw new IllegalStateException("Camera is in motion.");
 
@@ -511,7 +590,7 @@ public class CubeState extends BaseAppState {
         ));
     }
 
-    private boolean tryLoad (String s) {
+    private boolean tryLoad(String s) {
         restart();
         for (char c : s.toCharArray()) {
             if(!(Character.isLowerCase(c) ? moveHero(charToDir(c), false) :
@@ -539,7 +618,7 @@ public class CubeState extends BaseAppState {
 
         // 恢复游戏状态
         if (linesRead == level && !line.isEmpty()) {
-            String preivousSteps = steps;
+            String previousSteps = steps;
             steps = new String();
 
             if (tryLoad(line)) {
@@ -549,13 +628,14 @@ public class CubeState extends BaseAppState {
                 ));
 
                 checkWin();
+                checkDeadlock();
             } else {
                 getStateManager().attach(new AlertState(
                         "Invalid Archive",
                         "The archive for level " + level + " is invalid."
                 ));
 
-                if(!tryLoad(preivousSteps)) throw new IllegalStateException("Invalid previous steps: " + preivousSteps);
+                if(!tryLoad(previousSteps)) throw new IllegalStateException("Invalid previous steps: " + previousSteps);
             }
 
             initCamera();
@@ -565,6 +645,19 @@ public class CubeState extends BaseAppState {
                     "No archive found for " + Main.username + " at level " + level + "."
             ));
         }
+    }
+
+    public String solve() {
+        if (isWin) return null;
+
+        char[][] newMap = new char[rows][cols];
+        for (int i = 0; i < rows; i++) System.arraycopy(map[i], 0, newMap[i], 0, cols);
+        for (Integer id : goals) {
+            int x = hashX(id), y = hashY(id);
+            newMap[x][y] = newMap[x][y] == 'B' ? 'X' : '.';
+        }
+
+        return Solver.solve(app, rows, cols, heroX, heroY, newMap);
     }
 
     @Override
