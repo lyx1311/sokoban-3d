@@ -8,6 +8,7 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
 import main.LevelSelectionState;
 import main.Main;
@@ -16,12 +17,14 @@ public class MenuState extends BaseAppState {
     private Application app;
     private final GameState gameState;
     private final CubeState cubeState;
+    private int level;
     private Node guiNode;
     private Container menu;
 
-    public MenuState(GameState gameState, CubeState cubeState) {
+    public MenuState(GameState gameState, CubeState cubeState, int level) {
         this.gameState = gameState;
         this.cubeState = cubeState;
+        this.level = level;
     }
 
     @Override
@@ -43,6 +46,12 @@ public class MenuState extends BaseAppState {
 
     private void initGui() {
         menu = new Container();
+
+        Label levelLabel = menu.addChild(new Label("Level " + level));
+        levelLabel.setFontSize(30);
+
+        Label stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
+        stepsLabel.setFontSize(24);
 
         Button restartButton = menu.addChild(new Button("Restart"));
         restartButton.setFontSize(24);
@@ -74,8 +83,6 @@ public class MenuState extends BaseAppState {
         Button backButton = menu.addChild(new Button("Back (no save)"));
         backButton.setFontSize(24);
         if (Main.username.equals("Visitor")) backButton.setText("Back");
-
-        // 设置按钮点击事件
         backButton.addClickCommands(source -> {
             // if (!Main.username.equals("Visitor")) cubeState.save();
 
@@ -83,6 +90,13 @@ public class MenuState extends BaseAppState {
             gameState.setMenuOpen(false); // 关闭菜单
             getStateManager().detach(gameState); // 移除游戏状态
             getStateManager().attach(new LevelSelectionState()); // 切换到游戏状态
+        });
+
+        Button closeButton = menu.addChild(new Button("Close Menu"));
+        closeButton.setFontSize(24);
+        closeButton.addClickCommands(source -> {
+            getStateManager().detach(this);
+            gameState.setMenuOpen(false);
         });
 
         // 设置窗口位置

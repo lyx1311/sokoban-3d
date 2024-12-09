@@ -66,7 +66,7 @@ public class GameState extends BaseAppState {
                         isMenuOpen = false;
                         System.out.println("Close menu");
                     } else {
-                        menuState = new MenuState(GameState.this, cubeState);
+                        menuState = new MenuState(GameState.this, cubeState, level);
                         getStateManager().attach(menuState);
                         isMenuOpen = true;
                     }

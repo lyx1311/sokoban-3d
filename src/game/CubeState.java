@@ -233,6 +233,7 @@ public class CubeState extends BaseAppState {
         cameraNode.setLocalRotation(new Quaternion(0f, 0.75f, 0f, 0.75f));
     }
 
+    public int getSteps() { return steps.length(); }
     public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isMovingFlyCam(); }
     public boolean isFlying() { return cameraControl.isFlying(); }
 
