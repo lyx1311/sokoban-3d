@@ -44,7 +44,6 @@ public class MenuState extends BaseAppState {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        initGui();
     }
 
     private void initGui() {
@@ -59,6 +58,14 @@ public class MenuState extends BaseAppState {
         Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
         solveButton.setFontSize(24);
         solveButton.addClickCommands(source -> {
+            if (cubeState.isWin()) {
+                getStateManager().attach(new AlertState(
+                        "You've Won",
+                        "Can't solve a solved level."
+                ));
+                return;
+            }
+
             gameState.closeMenu();
 
             if (gameState.isSolving()) {
@@ -80,7 +87,6 @@ public class MenuState extends BaseAppState {
             if(checkWorking()) return;
 
             cubeState.restart();
-
             gameState.closeMenu();
         });
 
@@ -115,6 +121,8 @@ public class MenuState extends BaseAppState {
             gameState.closeMenu(); // 关闭菜单
             getStateManager().detach(gameState); // 移除游戏状态
             getStateManager().attach(new LevelSelectionState()); // 切换到游戏状态
+
+            Main.createBackground(app); // 创建背景图片
         });
 
         Button closeButton = menu.addChild(new Button("Close Menu"));
@@ -140,14 +148,18 @@ public class MenuState extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() { guiNode.attachChild(menu); }
+    protected void onEnable() {
+        initGui(); // 初始化 GUI
+        guiNode.attachChild(menu); // 将菜单添加到 GUI 节点
+    }
 
     @Override
     protected void onDisable() {
         for (Spatial child : menu.getChildren()) {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
-        menu.removeFromParent();
+        menu.detachAllChildren(); // 移除所有子节点
+        menu.removeFromParent(); // 将菜单从 GUI 节点移除
     }
 
     @Override

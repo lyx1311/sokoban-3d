@@ -34,7 +34,6 @@ public class LevelSelectionState extends BaseAppState {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        initGui();
     }
 
     private void initGui() {
@@ -49,6 +48,8 @@ public class LevelSelectionState extends BaseAppState {
             levelButton.setFontSize(24);
             final int level = i;
             levelButton.addClickCommands(source -> {
+                Main.removeBackground(); // 移除背景图片
+
                 getStateManager().detach(this); // 移除当前状态
                 getStateManager().attach(new GameState(level)); // 切换到 GameState
             });
@@ -69,8 +70,8 @@ public class LevelSelectionState extends BaseAppState {
 
     @Override
     public void onEnable() {
+        initGui(); // 初始化 GUI
         guiNode.attachChild(levelSelectionForm); // 将菜单添加到 GUI 节点
-        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -78,8 +79,8 @@ public class LevelSelectionState extends BaseAppState {
         for (Spatial child : levelSelectionForm.getChildren()) {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
+        levelSelectionForm.detachAllChildren(); // 移除所有子节点
         levelSelectionForm.removeFromParent(); // 将菜单从 GUI 节点移除
-        Main.removeBackground(); // 移除背景图片
     }
 
     @Override

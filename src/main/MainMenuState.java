@@ -15,7 +15,6 @@ public class MainMenuState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container menu;
-    private Picture backgroundImage;
 
     @Override
     protected void initialize(Application app) {
@@ -30,7 +29,6 @@ public class MainMenuState extends BaseAppState {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        initGui();
     }
 
     private void initGui() {
@@ -48,16 +46,19 @@ public class MainMenuState extends BaseAppState {
         loginButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new LoginState()); // 切换到登录状态
+            cleanup(); // 清理资源
         });
         registerButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new RegisterState()); // 切换到注册状态
+            cleanup(); // 清理资源
         });
         visitorButton.addClickCommands(source -> {
             Main.username = "Visitor"; // 设置用户名
 
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new LevelSelectionState()); // 切换到游戏状态
+            cleanup(); // 清理资源
         });
         exitButton.addClickCommands(source -> {
             app.stop(); // 退出游戏
@@ -69,8 +70,8 @@ public class MainMenuState extends BaseAppState {
 
     @Override
     public void onEnable() {
+        initGui();
         guiNode.attachChild(menu); // 将菜单添加到 GUI 节点
-        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -78,8 +79,8 @@ public class MainMenuState extends BaseAppState {
         for (Spatial child : menu.getChildren()) {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
+        menu.detachAllChildren(); // 移除所有子节点
         menu.removeFromParent(); // 将菜单从 GUI 节点移除
-        Main.removeBackground(); // 删除背景图片
     }
 
     @Override

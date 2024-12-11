@@ -22,6 +22,7 @@ public class LoginState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container loginForm;
+    private String username = "", password = "";
 
     @Override
     protected void initialize(Application app) {
@@ -36,7 +37,6 @@ public class LoginState extends BaseAppState {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        initGui();
     }
 
     private void initGui() {
@@ -44,10 +44,10 @@ public class LoginState extends BaseAppState {
         guiNode.attachChild(loginForm);
 
         loginForm.addChild(new Label("Username:")).setFontSize(24);
-        TextField usernameField = loginForm.addChild(new TextField(""));
+        TextField usernameField = loginForm.addChild(new TextField(username));
 
         loginForm.addChild(new Label("Password:")).setFontSize(24);
-        PasswordField passwordField = loginForm.addChild(new PasswordField(""));
+        PasswordField passwordField = loginForm.addChild(new PasswordField(password));
 
         Button loginButton = loginForm.addChild(new Button("Log In"));
         loginButton.setFontSize(24);
@@ -56,8 +56,8 @@ public class LoginState extends BaseAppState {
 
         // 事件绑定
         loginButton.addClickCommands(source -> {
-            String username = usernameField.getText().trim();
-            String password = passwordField.getText();
+            username = usernameField.getText().trim();
+            password = passwordField.getText();
 
             if (authenticateUser(username, password)) {
                 getStateManager().attach(new AlertState(
@@ -70,16 +70,21 @@ public class LoginState extends BaseAppState {
 
                 getStateManager().detach(this);
                 getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
+                cleanup(); // 清理资源
             } else {
                 getStateManager().attach(new AlertState(
                         "Login Failed",
                         "Invalid username or password!"
                 ));
             }
+
+            onDisable();
+            onEnable();
         });
         backButton.addClickCommands(source -> {
             getStateManager().detach(this);
             getStateManager().attach(new MainMenuState()); // 返回主菜单
+            cleanup(); // 清理资源
         });
 
         // 设置窗口位置
@@ -120,8 +125,8 @@ public class LoginState extends BaseAppState {
 
     @Override
     public void onEnable() {
+        initGui(); // 初始化 GUI
         guiNode.attachChild(loginForm); // 将表单添加到 GUI 节点
-        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -129,8 +134,8 @@ public class LoginState extends BaseAppState {
         for (Spatial child : loginForm.getChildren()) {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
+        loginForm.detachAllChildren(); // 移除表单的所有子节点
         loginForm.removeFromParent(); // 将表单从 GUI 节点移除
-        Main.removeBackground(); // 删除背景图片
     }
 
     @Override

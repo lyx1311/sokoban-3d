@@ -28,6 +28,7 @@ public class RegisterState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container registerForm;
+    private String username = "", password = "", confirmPassword = "";
 
     @Override
     protected void initialize(Application app) {
@@ -42,7 +43,6 @@ public class RegisterState extends BaseAppState {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        initGui();
     }
 
     private void initGui() {
@@ -50,13 +50,13 @@ public class RegisterState extends BaseAppState {
         guiNode.attachChild(registerForm);
 
         registerForm.addChild(new Label("Username:")).setFontSize(24);
-        TextField usernameField = registerForm.addChild(new TextField(""));
+        TextField usernameField = registerForm.addChild(new TextField(username));
 
         registerForm.addChild(new Label("Password:")).setFontSize(24);
-        PasswordField passwordField = registerForm.addChild(new PasswordField(""));
+        PasswordField passwordField = registerForm.addChild(new PasswordField(password));
 
         registerForm.addChild(new Label("Confirm Password:")).setFontSize(24);
-        PasswordField confirmPasswordField = registerForm.addChild(new PasswordField(""));
+        PasswordField confirmPasswordField = registerForm.addChild(new PasswordField(confirmPassword));
 
         Button registerButton = registerForm.addChild(new Button("Register"));
         registerButton.setFontSize(24);
@@ -65,9 +65,9 @@ public class RegisterState extends BaseAppState {
 
         // 事件绑定
         registerButton.addClickCommands(source -> {
-            String username = usernameField.getText().trim();
-            String password = passwordField.getText();
-            String confirmPassword = confirmPasswordField.getText();
+            username = usernameField.getText().trim();
+            password = passwordField.getText();
+            confirmPassword = confirmPasswordField.getText();
 
             if (username.length() < MIN_USERNAME_LENGTH || username.length() > MAX_USERNAME_LENGTH) {
                 getStateManager().attach(new AlertState(
@@ -116,50 +116,23 @@ public class RegisterState extends BaseAppState {
 
                     getStateManager().detach(this);
                     getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
+                    cleanup(); // 清理资源
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+
+            onDisable();
+            onEnable();
         });
         backButton.addClickCommands(source -> {
             getStateManager().detach(this);
             getStateManager().attach(new MainMenuState()); // 返回主菜单
+            cleanup(); // 清理资源
         });
 
         // 设置窗口位置
         registerForm.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);
-    }
-
-    // 验证用户凭证
-    private boolean authenticateUser(String username, String password) {
-        File file = new File(USER_LIST_FILE);
-        if (file.exists()) {
-            try (Scanner scanner = new Scanner(file)) {
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String[] parts = line.split(" ");
-                    if (parts.length == 2 && parts[0].equals(username) && parts[1].equals(password)) return true;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.err.println("User list file not found!");
-        }
-        return false; // 用户验证失败
-    }
-
-    // 检查用户存档
-    private void checkArchive(String username) {
-        File file = new File("archives/" + username + "_archive.txt");
-        if (!file.exists()) {
-            System.err.println("No archive found for user " + username + ". A new archive will be created.");
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     // 检查用户名是否符合要求
@@ -175,7 +148,7 @@ public class RegisterState extends BaseAppState {
             try (Scanner scanner = new Scanner(file)) {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
-                    String[] parts = line.split(",");
+                    String[] parts = line.split(" ");
                     if (parts.length > 0 && parts[0].equals(username)) {
                         return true;
                     }
@@ -234,8 +207,8 @@ public class RegisterState extends BaseAppState {
 
     @Override
     public void onEnable() {
+        initGui(); // 初始化 GUI
         guiNode.attachChild(registerForm); // 将表单添加到 GUI 节点
-        Main.createBackground(app); // 创建背景图片
     }
 
     @Override
@@ -243,8 +216,8 @@ public class RegisterState extends BaseAppState {
         for (Spatial child : registerForm.getChildren()) {
             if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
         }
-        registerForm.removeFromParent(); // 将表单从 GUI 节点移除
-        Main.removeBackground(); // 删除背景图片
+         registerForm.detachAllChildren(); // 移除表单的所有子节点
+         registerForm.removeFromParent(); // 将表单从 GUI 节点移除
     }
 
     @Override

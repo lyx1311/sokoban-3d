@@ -30,10 +30,13 @@ public class Main extends SimpleApplication {
 
         // 初始化相机
         flyCam.setMoveSpeed(50f);
-        flyCam.setDragToRotate(true);
+        flyCam.setDragToRotate(false);
+
+        // 创建背景图片
+        Main.createBackground(this);
     }
 
-    private static Picture background;
+    private static Picture background = null;
     public static void createBackground(Application app) {
         float width = app.getCamera().getWidth();
         float height = app.getCamera().getHeight();

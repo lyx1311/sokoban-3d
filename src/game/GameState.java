@@ -175,6 +175,7 @@ public class GameState extends BaseAppState {
         if (cubeState.isWin() && !cubeState.inMotion() && !cubeState.isFlying()) {
             cubeState.reverseFly();
             if (isMenuOpen) closeMenu();
+            openMenu();
         }
     }
 
