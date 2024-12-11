@@ -606,8 +606,8 @@ public class CubeState extends BaseAppState {
         }
         return true;
     }
-    public void load() {
-        if (Main.username.equals("Visitor")) return;
+    public boolean load() {
+        if (Main.username.equals("Visitor")) return false;
 
         // 打开存档文件
         File archiveFile = new File(ARCHIVE_FILE_PATH + Main.username + "_archive.txt");
@@ -621,15 +621,17 @@ public class CubeState extends BaseAppState {
                 linesRead++;
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Archive file not found: " + archiveFile);
         }
 
-        // 恢复游戏状态
+        boolean load = false;
+
         if (linesRead == level && !line.isEmpty()) {
             String previousSteps = steps;
             steps = new String();
 
             if (tryLoad(line)) {
+                load = true;
                 getStateManager().attach(new AlertState(
                         "Game Loaded",
                         "The archive has been loaded successfully."
@@ -653,6 +655,8 @@ public class CubeState extends BaseAppState {
                     "No archive found for " + Main.username + " at level " + level + "."
             ));
         }
+
+        return load;
     }
 
     public String solve() {

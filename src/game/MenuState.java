@@ -55,31 +55,33 @@ public class MenuState extends BaseAppState {
         stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
         stepsLabel.setFontSize(24);
 
-        Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
-        solveButton.setFontSize(24);
-        solveButton.addClickCommands(source -> {
-            if (cubeState.isWin()) {
-                getStateManager().attach(new AlertState(
-                        "You've Won",
-                        "Can't solve a solved level."
-                ));
-                return;
-            }
+        if (!cubeState.isWin()) {
+            Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
+            solveButton.setFontSize(24);
+            solveButton.addClickCommands(source -> {
+                if (cubeState.isWin()) {
+                    getStateManager().attach(new AlertState(
+                            "You've Won",
+                            "Can't solve a solved level."
+                    ));
+                    return;
+                }
 
-            gameState.closeMenu();
+                gameState.closeMenu();
 
-            if (gameState.isSolving()) {
-                gameState.stopSolving();
-            } else {
-                if (checkWorking()) return;
+                if (gameState.isSolving()) {
+                    gameState.stopSolving();
+                } else {
+                    if (checkWorking()) return;
 
-                gameState.startSolving();
-                getStateManager().attach(new AlertState(
-                        "AI Solving",
-                        "Please wait for a moment."
-                ));
-            }
-        });
+                    gameState.startSolving();
+                    getStateManager().attach(new AlertState(
+                            "AI Solving",
+                            "Please wait for a moment."
+                    ));
+                }
+            });
+        }
 
         Button restartButton = menu.addChild(new Button("Restart"));
         restartButton.setFontSize(24);
@@ -96,8 +98,7 @@ public class MenuState extends BaseAppState {
             loadButton.addClickCommands(source -> {
                 if(checkWorking()) return;
 
-                cubeState.load();
-                gameState.closeMenu();
+                if (cubeState.load()) gameState.closeMenu();
             });
 
             Button saveButton = menu.addChild(new Button("Save"));
