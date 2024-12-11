@@ -17,6 +17,11 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class AlertState extends BaseAppState {
+    private static final float startHeight = 200; // 弹框相对于屏幕中央的初始高度
+    private static final float endHeight = 300; // 弹框相对于屏幕中央的最终高度
+    private static final float stopMovingTime = 0.8f; // 弹框从初始高度到最终高度的时间（秒）
+    private static final float maxTime = 3.0f; // 自动关闭的时间（秒）
+
     private Application app;
     private String title;
     private String message;
@@ -26,7 +31,6 @@ public class AlertState extends BaseAppState {
     private RawInputListener inputInterceptor; // 用于监测鼠标输入
 
     private float timer = 0;  // 用于计时
-    private final float maxTime = 3.0f; // 自动关闭的时间（秒）
 
     public AlertState(String title, String message) {
         this.title = title;
@@ -91,7 +95,7 @@ public class AlertState extends BaseAppState {
         // 设置弹框位置
         alertBox.setLocalTranslation(
                 app.getCamera().getWidth() / 2f - 150,
-                app.getCamera().getHeight() / 2f + 100,
+                app.getCamera().getHeight() / 2f + startHeight,
                 1
         );
     }
@@ -107,9 +111,7 @@ public class AlertState extends BaseAppState {
             inputInterceptor = new RawInputListener() {
                 @Override
                 public void onMouseButtonEvent(com.jme3.input.event.MouseButtonEvent evt) {
-                    if (!evt.isPressed()) return;
-
-                    onDisable(); // 点击任意位置关闭弹框
+                    if (evt.isPressed()) onDisable(); // 点击任意位置关闭弹框
                 }
 
                 @Override
@@ -139,8 +141,27 @@ public class AlertState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        if (timer >= maxTime) onDisable(); // 超过最大时间后关闭
-        else timer += tpf; // 增加计时器
+        timer += tpf;
+
+        if (timer >= maxTime) {
+            onDisable(); // 超过最大时间后关闭
+        } else if (timer <= stopMovingTime) {
+            // 计算弹框的高度
+            float height = startHeight + (endHeight - startHeight) * Math.min(timer / stopMovingTime, 1);
+
+            // 设置弹框位置
+            alertBox.setLocalTranslation(
+                    app.getCamera().getWidth() / 2f - 150,
+                    app.getCamera().getHeight() / 2f + height,
+                    1
+            );
+        } else {
+            alertBox.setLocalTranslation(
+                    app.getCamera().getWidth() / 2f - 150,
+                    app.getCamera().getHeight() / 2f + endHeight,
+                    1
+            );
+        }
     }
 
     @Override
