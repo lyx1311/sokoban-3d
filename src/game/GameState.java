@@ -17,7 +17,7 @@ public class GameState extends BaseAppState {
     private InputManager inputManager;
     private CubeState cubeState;
     private MenuState menuState;
-    private boolean isMenuOpen = false, isSolving = false;
+    private boolean isMenuOpen = false, isSolving = false, isSolverWorking = false;
     private Queue<String> instructions = new LinkedList<>();
     private Queue<Character> solution = new LinkedList<>();
 
@@ -34,6 +34,7 @@ public class GameState extends BaseAppState {
     }
 
     public boolean isSolving() { return isSolving; }
+    public boolean isSolverWorking() { return isSolverWorking; }
     public boolean isWorking() { return cubeState.inMotion() || !instructions.isEmpty(); }
 
     public void openMenu() {
@@ -47,20 +48,27 @@ public class GameState extends BaseAppState {
     }
 
     public void startSolving() {
-        isSolving = true;
+        isSolverWorking = true;
         if (cubeState.isFlying()) cubeState.reverseFly();
 
-        String steps = cubeState.solve();
-        if (steps == null || !isSolving) {
-            stopSolving();
-        } else {
-            System.out.println("Solution: " + steps);
-            for (char step : steps.toCharArray()) solution.add(step);
-        }
+        cubeState.solve(steps -> {
+            isSolverWorking = false;
+            isSolving = true;
+
+            if (steps == null) {
+                System.out.println("No solution found");
+                stopSolving();
+            } else {
+                System.out.println("Solution: " + steps);
+                for (char step : steps.toCharArray()) solution.add(step);
+            }
+        });
     }
     public void stopSolving() {
         isSolving = false;
         solution.clear();
+
+        System.out.println("Solving stopped");
     }
 
     private void initInput() {
@@ -94,7 +102,7 @@ public class GameState extends BaseAppState {
                     }
                     return;
                 }
-                if (isSolving) return;
+                if (isSolving || isSolverWorking) return;
                 switch (name) {
                     case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
                         System.out.println(" > " + name);

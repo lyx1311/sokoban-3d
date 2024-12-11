@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -26,6 +27,7 @@ import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import main.AlertState;
 import main.Main;
+import org.lwjgl.Sys;
 
 public class CubeState extends BaseAppState {
     private static final String ARCHIVE_FILE_PATH = "archives/";
@@ -659,8 +661,8 @@ public class CubeState extends BaseAppState {
         return load;
     }
 
-    public String solve() {
-        if (isWin) return null;
+    public void solve(Consumer<String> handler) {
+        if (isWin) throw new IllegalStateException("Game is already won.");
 
         char[][] newMap = new char[rows][cols];
         for (int i = 0; i < rows; i++) System.arraycopy(map[i], 0, newMap[i], 0, cols);
@@ -669,7 +671,15 @@ public class CubeState extends BaseAppState {
             newMap[x][y] = newMap[x][y] == 'B' ? 'X' : '.';
         }
 
-        return Solver.solve(app, rows, cols, heroX, heroY, newMap);
+        // 创建一个新线程来运行 Solver.solve()
+        new Thread(() -> {
+            String solution = Solver.solve(app, rows, cols, heroX, heroY, newMap);
+            System.out.println("Solution in CubeState: " + solution);
+            app.enqueue(() -> {
+                System.out.println("Solution in App Enqueue: " + solution);
+                handler.accept(solution);
+            }); // 在主线程中更新状态
+        }).start();
     }
 
     @Override

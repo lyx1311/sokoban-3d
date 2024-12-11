@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 
 import com.jme3.app.Application;
+
 import main.AlertState;
 
 class Position implements Comparable<Position> {
@@ -179,16 +180,25 @@ public abstract class Solver {
                 Status next = new Status(newHero, boxes, cur.getSteps() + step, cost);
                 if (visited.containsKey(next)) continue;
 
-                if (next.heuristic() == 0) return next.getSteps();
+                if (next.heuristic() == 0) {
+                    long time = System.currentTimeMillis() - startTime;
+                    String formattedTime = String.format("%d.%03d", time / 1000, time % 1000);
+                    app.getStateManager().attach(new AlertState(
+                            "Solution Found",
+                            "Solution found in " + formattedTime + " seconds."
+                    ));
+
+                    return next.getSteps();
+                }
 
                 queue.add(next);
                 visited.put(next, true);
             }
 
-            if (System.currentTimeMillis() - startTime > 10000) {
+            if (System.currentTimeMillis() - startTime > 15000) {
                 app.getStateManager().attach(new AlertState(
                         "Time Out",
-                        "No solution found in 10 seconds."
+                        "No solution found in 15 seconds."
                 ));
                 return null;
             }

@@ -59,6 +59,8 @@ public class MenuState extends BaseAppState {
             Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
             solveButton.setFontSize(24);
             solveButton.addClickCommands(source -> {
+                if (checkSolverWorking()) return;
+
                 if (cubeState.isWin()) {
                     getStateManager().attach(new AlertState(
                             "You've Won",
@@ -86,7 +88,8 @@ public class MenuState extends BaseAppState {
         Button restartButton = menu.addChild(new Button("Restart"));
         restartButton.setFontSize(24);
         restartButton.addClickCommands(source -> {
-            if(checkWorking()) return;
+            if (checkSolverWorking()) return;
+            if (checkWorking()) return;
 
             cubeState.restart();
             gameState.closeMenu();
@@ -96,7 +99,8 @@ public class MenuState extends BaseAppState {
             Button loadButton = menu.addChild(new Button("Load"));
             loadButton.setFontSize(24);
             loadButton.addClickCommands(source -> {
-                if(checkWorking()) return;
+                if (checkSolverWorking()) return;
+                if (checkWorking()) return;
 
                 if (cubeState.load()) gameState.closeMenu();
             });
@@ -104,7 +108,8 @@ public class MenuState extends BaseAppState {
             Button saveButton = menu.addChild(new Button("Save"));
             saveButton.setFontSize(24);
             saveButton.addClickCommands(source -> {
-                if(checkWorking()) return;
+                if (checkSolverWorking()) return;
+                if (checkWorking()) return;
 
                 cubeState.save();
                 gameState.closeMenu();
@@ -115,7 +120,8 @@ public class MenuState extends BaseAppState {
         backButton.setFontSize(24);
         if (Main.username.equals("Visitor")) backButton.setText("Back");
         backButton.addClickCommands(source -> {
-            if(checkWorking()) return;
+            if (checkSolverWorking()) return;
+            if (checkWorking()) return;
 
             // if (!Main.username.equals("Visitor")) cubeState.save();
 
@@ -136,8 +142,20 @@ public class MenuState extends BaseAppState {
 
     public void updateSteps() { stepsLabel.setText("Steps: " + cubeState.getSteps()); }
 
+    private boolean checkSolverWorking() {
+        if (gameState.isSolverWorking()) {
+            getStateManager().attach(new AlertState(
+                    "AI Finding Solution",
+                    "Please wait for a moment."
+            ));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean checkWorking() {
-        if (gameState.isWorking()) {
+        if (gameState.isSolving() || gameState.isWorking()) {
             getStateManager().attach(new AlertState(
                     "You Are Moving",
                     "Please wait for a moment."
