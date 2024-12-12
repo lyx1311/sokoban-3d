@@ -3,8 +3,12 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.material.Material;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Quad;
+import com.jme3.texture.Texture;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -42,15 +46,37 @@ public class MenuState extends BaseAppState {
 
         // 初始化 Lemur GUI
         GuiGlobals.initialize(app);
+        //将按键替换成图片
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
     }
+    private Spatial getPicture() {
 
+        // 获得屏幕分辨率
+        float width = app.getCamera() .getWidth();
+        float height = app.getCamera().getHeight();
+
+        // 创建一个四边形
+        Quad quad = new Quad(width, height);
+        Geometry geom = new Geometry("Picture", quad);
+
+        // 加载图片
+        Texture tex = app.getAssetManager().loadTexture("Textures/interface.jpg");
+
+        Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setTexture("ColorMap", tex);
+
+        // 应用这个材质
+        geom.setMaterial(mat);
+
+        return geom;
+    }
     private void initGui() {
         menu = new Container();
+        Button pic = menu.addChild(new Button("pic"));
+        guiNode.attachChild(pic);
+        guiNode.attachChild(getPicture());
 
-        Label levelLabel = menu.addChild(new Label("Level " + level));
-        levelLabel.setFontSize(30);
 
         stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
         stepsLabel.setFontSize(24);
