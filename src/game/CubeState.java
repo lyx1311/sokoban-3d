@@ -25,9 +25,10 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
+
 import main.AlertState;
 import main.Main;
-import org.lwjgl.Sys;
+import main.SettingState;
 
 public class CubeState extends BaseAppState {
     private static final String ARCHIVE_FILE_PATH = "archives/";
@@ -35,8 +36,6 @@ public class CubeState extends BaseAppState {
     private static final String IMAGE_PATH = "images/";
     private static final float EPS = 1e-4f;
     private static final float SIDE = 10f;
-    private static final float MOVE_DURATION = 0.8f;
-    private static final float ROTATE_DURATION = 1.5f;
     private static final Vector3f UNIT_U = new Vector3f(-1f, 0f, 0f);
     private static final Vector3f UNIT_D = new Vector3f(1f, 0f, 0f);
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
@@ -81,8 +80,8 @@ public class CubeState extends BaseAppState {
 
         // 初始化场景
         initSky();
-        initFloor();
         initCubes();
+        initFloor();
         initLights();
         initCamera();
     }
@@ -94,19 +93,6 @@ public class CubeState extends BaseAppState {
                 SkyFactory.EnvMapType.CubeMap);
         sky.setLocalScale(350); // 天空盒大小
         rootNode.attachChild(sky);
-    }
-
-    private void initFloor() {
-        Material mat = assetManager.loadMaterial("Textures/Terrain/Pond/Pond.j3m"); // 材质
-
-        Quad quad = new Quad(200, 200); // 矩形
-        quad.scaleTextureCoordinates(new Vector2f(20, 20)); // 纹理坐标缩放，重复20次
-
-        Geometry geom = new Geometry("Floor", quad); // 几何体
-        geom.setMaterial(mat); // 设置材质
-        geom.rotate(-FastMath.HALF_PI, 0, 0); // 旋转到水平
-
-        rootNode.attachChild(geom); // 添加到场景
     }
 
     private void initCubes() {
@@ -214,8 +200,21 @@ public class CubeState extends BaseAppState {
 //        geom.setMaterial(material); // 设置材质
 //        geom.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
 //        geom.rotate(-FastMath.HALF_PI, 0, 0);
-//        geom.move(x - side, 0.1f, z + side);
+//        geom.move(x - side, 0.01f, z + side);
 //        rootNode.attachChild(geom);
+    }
+
+    private void initFloor() {
+        Material mat = assetManager.loadMaterial("Textures/Terrain/Pond/Pond.j3m"); // 材质
+
+        Quad quad = new Quad(2 * (rows + 1) * SIDE, 2 * (cols + 1) * SIDE); // 矩形
+        quad.scaleTextureCoordinates(new Vector2f(2 * (rows + 1), 2 * (cols + 1))); // 纹理坐标缩放，设置重复次数
+
+        Geometry geom = new Geometry("Floor", quad); // 几何体
+        geom.setMaterial(mat); // 设置材质
+        geom.rotate(-FastMath.HALF_PI, 0, 0); // 旋转到水平
+
+        rootNode.attachChild(geom); // 添加到场景
     }
 
     private void initLights() {
@@ -317,7 +316,7 @@ public class CubeState extends BaseAppState {
         // 判断是否可以移动
         if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] == '#' || map[x][y] == 'B') return false;
 
-        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, SettingState.getMoveSpeed());
 
         // 更新英雄位置
         heroX = x;
@@ -379,7 +378,7 @@ public class CubeState extends BaseAppState {
         }
 
         // 移动相机
-        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, SettingState.getMoveSpeed());
 
         // 更新英雄位置
         heroX = x;
@@ -466,7 +465,7 @@ public class CubeState extends BaseAppState {
         int x = heroX + Math.round(direction.x);
         int y = heroY - Math.round(direction.z);
 
-        cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        cameraControl.moveCamera(startPosition, endPosition, SettingState.getMoveSpeed());
 
         if (Character.isUpperCase(c)) {
             Vector3f boxDirection = charToDir(c);
@@ -500,7 +499,7 @@ public class CubeState extends BaseAppState {
 
         if (isSameRotation(currentRotation, newRotation)) return false;
 
-        cameraControl.rotateCamera(currentRotation, newRotation, ROTATE_DURATION);
+        cameraControl.rotateCamera(currentRotation, newRotation, SettingState.getRotateSpeed());
         return true;
     }
     public void rotateCamera(float angle) {
@@ -519,7 +518,7 @@ public class CubeState extends BaseAppState {
         Quaternion newRotation = new Quaternion().fromAngles(angles[0], newYaw, angles[2]);
 
         // 应用新的旋转角度到相机
-        cameraControl.rotateCamera(currentRotation, newRotation, ROTATE_DURATION);
+        cameraControl.rotateCamera(currentRotation, newRotation, SettingState.getRotateSpeed());
     }
 
     public void reverseFly() {
@@ -552,8 +551,8 @@ public class CubeState extends BaseAppState {
         steps = new String();
 
         initSky();
-        initFloor();
         initCubes();
+        initFloor();
         initCamera();
     }
 
@@ -674,11 +673,7 @@ public class CubeState extends BaseAppState {
         // 创建一个新线程来运行 Solver.solve()
         new Thread(() -> {
             String solution = Solver.solve(app, rows, cols, heroX, heroY, newMap);
-            System.out.println("Solution in CubeState: " + solution);
-            app.enqueue(() -> {
-                System.out.println("Solution in App Enqueue: " + solution);
-                handler.accept(solution);
-            }); // 在主线程中更新状态
+            app.enqueue(() -> handler.accept(solution)); // 在主线程中更新状态
         }).start();
     }
 

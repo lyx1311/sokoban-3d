@@ -41,6 +41,14 @@ public class LevelSelectionState extends BaseAppState {
         guiNode.attachChild(levelSelectionForm);
 
         levelSelectionForm.addChild(new Label("Hello, " + Main.username + "!")).setFontSize(24);
+
+        Button settingButton = levelSelectionForm.addChild(new Button("Settings"));
+        settingButton.setFontSize(24);
+        settingButton.addClickCommands(source -> {
+            getStateManager().detach(this); // 移除当前状态
+            getStateManager().attach(new SettingState()); // 切换到 SettingState
+        });
+
         levelSelectionForm.addChild(new Label("Select a level:")).setFontSize(24);
 
         for (int i = 1; i <= LEVEL_COUNT; i++) {
