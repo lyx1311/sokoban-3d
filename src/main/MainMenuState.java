@@ -3,8 +3,13 @@ package main;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.InputManager;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.ui.Picture;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -13,7 +18,10 @@ import com.simsilica.lemur.style.BaseStyles;
 public class MainMenuState extends BaseAppState {
     private Application app;
     private Node guiNode;
-    private Container menu;
+    private Picture logInPicture;
+    private Picture registerPicture;
+    private Picture visitorPicture;
+    private InputManager inputManager;
 
     @Override
     protected void initialize(Application app) {
@@ -23,63 +31,80 @@ public class MainMenuState extends BaseAppState {
             throw new IllegalArgumentException("Application is not an instance of SimpleApplication");
         }
         guiNode = ((SimpleApplication) app).getGuiNode();
+        inputManager = app.getInputManager();
 
         // 初始化 Lemur GUI
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
-        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+        GuiGlobals.getInstance().getStyles().setDefaultStyle("");
     }
 
     private void initGui() {
-        menu = new Container();
-        Button loginButton = menu.addChild(new Button("Log In"));
-        loginButton.setFontSize(24);
-        Button registerButton = menu.addChild(new Button("Register"));
-        registerButton.setFontSize(24);
-        Button visitorButton = menu.addChild(new Button("Play as Visitor"));
-        visitorButton.setFontSize(18);
-        Button exitButton = menu.addChild(new Button("Exit"));
-        exitButton.setFontSize(24);
+        logInPicture = new Picture("LogIn");
+        logInPicture.setImage(app.getAssetManager(), "icon.png", true);
+        logInPicture.setWidth(200);
+        logInPicture.setHeight(200);
+        logInPicture.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0);
+        guiNode.attachChild(logInPicture);
 
-        // 设置按钮点击事件
-        loginButton.addClickCommands(source -> {
-            getStateManager().detach(this); // 移除当前状态
-            getStateManager().attach(new LoginState()); // 切换到登录状态
-            cleanup(); // 清理资源
-        });
-        registerButton.addClickCommands(source -> {
-            getStateManager().detach(this); // 移除当前状态
-            getStateManager().attach(new RegisterState()); // 切换到注册状态
-            cleanup(); // 清理资源
-        });
-        visitorButton.addClickCommands(source -> {
-            Main.username = "Visitor"; // 设置用户名
+        registerPicture = new Picture("Register");
+        registerPicture.setImage(app.getAssetManager(), "icon.png", true);
+        registerPicture.setWidth(200);
+        registerPicture.setHeight(200);
+        registerPicture.setLocalTranslation(10, app.getCamera().getHeight() - 450, 0);
+        guiNode.attachChild(registerPicture);
 
-            getStateManager().detach(this); // 移除当前状态
-            getStateManager().attach(new LevelSelectionState()); // 切换到游戏状态
-            cleanup(); // 清理资源
-        });
-        exitButton.addClickCommands(source -> {
-            app.stop(); // 退出游戏
-        });
-
-        // 设置窗口位置
-        menu.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);
+        visitorPicture = new Picture("Visitor");
+        visitorPicture.setImage(app.getAssetManager(), "icon.png", true);
+        visitorPicture.setWidth(200);
+        visitorPicture.setHeight(200);
+        visitorPicture.setLocalTranslation(10, app.getCamera().getHeight() - 700, 0);
+        guiNode.attachChild(visitorPicture);
     }
+
+    private void initInput() {
+        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(actionListener, "Click");
+    }
+
+    private final ActionListener actionListener = new ActionListener() {
+        @Override
+        public void onAction(String name, boolean isPressed, float tpf) {
+            if (name.equals("Click") && !isPressed) {
+                // 获取鼠标点击位置
+                float x = inputManager.getCursorPosition().x;
+                float y = inputManager.getCursorPosition().y;
+
+                // 检查点击位置是否在图片范围内
+                if (Main.inPicture(logInPicture, x, y)) {
+                    getStateManager().detach(MainMenuState.this); // 移除当前状态
+                    getStateManager().attach(new LoginState()); // 切换到登
+                } else if (Main.inPicture(registerPicture, x, y)) {
+                    getStateManager().detach(MainMenuState.this);
+                    getStateManager().attach(new RegisterState());
+                } else if (Main.inPicture(visitorPicture, x, y)) {
+                    Main.username = "Visitor";
+                    getStateManager().detach(MainMenuState.this);
+                    getStateManager().attach(new LevelSelectionState());
+                }
+            }
+        }
+    };
 
     @Override
     public void onEnable() {
         initGui();
-        guiNode.attachChild(menu); // 将菜单添加到 GUI 节点
+        initInput();
     }
 
     @Override
     public void onDisable() {
-        for (Spatial child : menu.getChildren()) {
-            if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
-        }
-        menu.detachAllChildren(); // 移除所有子节点
-        menu.removeFromParent(); // 将菜单从 GUI 节点移除
+        logInPicture.removeFromParent();
+        registerPicture.removeFromParent();
+        visitorPicture.removeFromParent();
+
+        inputManager.removeListener(actionListener);
+        inputManager.clearMappings();
     }
 
     @Override

@@ -29,8 +29,6 @@ public class GameState extends BaseAppState {
     protected void initialize(Application app) {
         this.app = app;
         this.inputManager = app.getInputManager();
-
-        initInput();
     }
 
     public boolean isSolving() { return isSolving; }
@@ -72,9 +70,6 @@ public class GameState extends BaseAppState {
     }
 
     private void initInput() {
-        // 移除空格键的默认映射
-        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
-
         // 添加自定义输入映射
         inputManager.addMapping("MoveForward", new KeyTrigger(KeyInput.KEY_W));
         inputManager.addMapping("MoveBackward", new KeyTrigger(KeyInput.KEY_S));
@@ -142,6 +137,7 @@ public class GameState extends BaseAppState {
     public void onEnable() {
         cubeState = new CubeState(level);
         getStateManager().attach(cubeState);
+        initInput();
     }
 
     @Override
