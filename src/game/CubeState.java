@@ -81,8 +81,8 @@ public class CubeState extends BaseAppState {
 
         // 初始化场景
         initSky();
-        initFloor();
         initCubes();
+        initFloor();
         initLights();
         initCamera();
     }
@@ -94,19 +94,6 @@ public class CubeState extends BaseAppState {
                 SkyFactory.EnvMapType.CubeMap);
         sky.setLocalScale(350); // 天空盒大小
         rootNode.attachChild(sky);
-    }
-
-    private void initFloor() {
-        Material mat = assetManager.loadMaterial("Textures/Terrain/Pond/Pond.j3m"); // 材质
-
-        Quad quad = new Quad(200, 200); // 矩形
-        quad.scaleTextureCoordinates(new Vector2f(20, 20)); // 纹理坐标缩放，重复20次
-
-        Geometry geom = new Geometry("Floor", quad); // 几何体
-        geom.setMaterial(mat); // 设置材质
-        geom.rotate(-FastMath.HALF_PI, 0, 0); // 旋转到水平
-
-        rootNode.attachChild(geom); // 添加到场景
     }
 
     private void initCubes() {
@@ -214,8 +201,21 @@ public class CubeState extends BaseAppState {
 //        geom.setMaterial(material); // 设置材质
 //        geom.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
 //        geom.rotate(-FastMath.HALF_PI, 0, 0);
-//        geom.move(x - side, 0.1f, z + side);
+//        geom.move(x - side, 0.01f, z + side);
 //        rootNode.attachChild(geom);
+    }
+
+    private void initFloor() {
+        Material mat = assetManager.loadMaterial("Textures/Terrain/Pond/Pond.j3m"); // 材质
+
+        Quad quad = new Quad(2 * (rows + 1) * SIDE, 2 * (cols + 1) * SIDE); // 矩形
+        quad.scaleTextureCoordinates(new Vector2f(2 * (rows + 1), 2 * (cols + 1))); // 纹理坐标缩放，设置重复次数
+
+        Geometry geom = new Geometry("Floor", quad); // 几何体
+        geom.setMaterial(mat); // 设置材质
+        geom.rotate(-FastMath.HALF_PI, 0, 0); // 旋转到水平
+
+        rootNode.attachChild(geom); // 添加到场景
     }
 
     private void initLights() {
@@ -552,8 +552,8 @@ public class CubeState extends BaseAppState {
         steps = new String();
 
         initSky();
-        initFloor();
         initCubes();
+        initFloor();
         initCamera();
     }
 
@@ -674,11 +674,7 @@ public class CubeState extends BaseAppState {
         // 创建一个新线程来运行 Solver.solve()
         new Thread(() -> {
             String solution = Solver.solve(app, rows, cols, heroX, heroY, newMap);
-            System.out.println("Solution in CubeState: " + solution);
-            app.enqueue(() -> {
-                System.out.println("Solution in App Enqueue: " + solution);
-                handler.accept(solution);
-            }); // 在主线程中更新状态
+            app.enqueue(() -> handler.accept(solution)); // 在主线程中更新状态
         }).start();
     }
 

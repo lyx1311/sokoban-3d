@@ -83,11 +83,11 @@ public class GameState extends BaseAppState {
         inputManager.addMapping("PushBox", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addMapping("RotateLeft", new KeyTrigger(KeyInput.KEY_Q));
         inputManager.addMapping("RotateRight", new KeyTrigger(KeyInput.KEY_E));
-        inputManager.addMapping("Fly", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addMapping("Undo", new KeyTrigger(KeyInput.KEY_U));
+        inputManager.addMapping("Fly", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addMapping("OpenMenu", new KeyTrigger(KeyInput.KEY_ESCAPE));
         inputManager.addListener(actionListener, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight",
-                "PushBox", "RotateLeft", "RotateRight", "Fly", "Undo", "OpenMenu");
+                "PushBox", "RotateLeft", "RotateRight", "Undo", "Fly", "OpenMenu");
     }
 
     private final ActionListener actionListener = new ActionListener() {
@@ -119,7 +119,10 @@ public class GameState extends BaseAppState {
                             instructions.add(name);
                         }
                         break;
-                    case "PushBox": case "Fly": case "Undo":
+                    case "PushBox": case "Undo":
+                        if (!cubeState.isFlying()) instructions.add(name);
+                        break;
+                    case "Fly":
                         instructions.add(name);
                         break;
                 }
