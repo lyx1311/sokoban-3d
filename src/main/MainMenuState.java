@@ -51,14 +51,14 @@ public class MainMenuState extends BaseAppState {
         registerPicture.setImage(app.getAssetManager(), "icon.png", true);
         registerPicture.setWidth(200);
         registerPicture.setHeight(200);
-        registerPicture.setLocalTranslation(10, app.getCamera().getHeight() - 400, 0);
+        registerPicture.setLocalTranslation(10, app.getCamera().getHeight() - 450, 0);
         guiNode.attachChild(registerPicture);
 
         visitorPicture = new Picture("Visitor");
         visitorPicture.setImage(app.getAssetManager(), "icon.png", true);
         visitorPicture.setWidth(200);
         visitorPicture.setHeight(200);
-        visitorPicture.setLocalTranslation(10, app.getCamera().getHeight() - 600, 0);
+        visitorPicture.setLocalTranslation(10, app.getCamera().getHeight() - 700, 0);
         guiNode.attachChild(visitorPicture);
     }
 
