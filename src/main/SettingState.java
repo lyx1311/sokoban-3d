@@ -73,7 +73,7 @@ public class SettingState extends BaseAppState {
         // 旋转速度设置
         settingForm.addChild(new Label("Rotate Speed: " + String.format("%.2f", rotateSpeed) +
                 " seconds per rotation")).setFontSize(24);
-        Slider rotateSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.5f, 2.5f,
+        Slider rotateSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.1f, 3.0f,
                 rotateSpeed)), 1);
         setStyle(rotateSpeedSlider, 0.1f);
         addButton(settingForm).addClickCommands(source -> {

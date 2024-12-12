@@ -141,10 +141,11 @@ public abstract class Solver {
     private static String solve(Status status) {
         HashMap<Status, Boolean> visited = new HashMap<>();
         PriorityQueue<Status> queue = new PriorityQueue<>((a, b) ->
-                a.heuristic() + a.getCost() - b.heuristic() - b.getCost());
+                a.heuristic() * 2 + a.getCost() - b.heuristic() * 2 - b.getCost());
         queue.add(status);
         visited.put(status, true);
 
+        int statusCount = 0;
         while (!queue.isEmpty()) {
             Status cur = queue.poll();
             Position hero = cur.getHero();
@@ -196,10 +197,12 @@ public abstract class Solver {
                 visited.put(next, true);
             }
 
+            statusCount++;
             if (System.currentTimeMillis() - startTime > SettingState.getSolverTimeLimit() * 1000) {
                 app.getStateManager().attach(new AlertState(
                         "Time Out",
-                        "No solution found in " + SettingState.getSolverTimeLimit() + " seconds."
+                        "No solution found in " + SettingState.getSolverTimeLimit() + " seconds. " +
+                        statusCount + " status checked."
                 ));
                 return null;
             }

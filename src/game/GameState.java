@@ -193,6 +193,7 @@ public class GameState extends BaseAppState {
     public void onDisable() {
         getStateManager().detach(cubeState);
         inputManager.removeListener(actionListener);
+        inputManager.clearMappings();
     }
 
     @Override
