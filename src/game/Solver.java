@@ -104,6 +104,7 @@ class Status {
 }
 
 public abstract class Solver {
+    private static final int MAX_RATE = 2;
     public static final int dx[] = {0, 1, 0, -1};
     public static final int dy[] = {1, 0, -1, 0};
     public static final char dir[] = {'r', 'd', 'l', 'u'};
@@ -135,13 +136,13 @@ public abstract class Solver {
         Solver.goals = goals.toArray(new Position[0]);
 
         startTime = System.currentTimeMillis();
-        return solve(new Status(new Position(heroX, heroY), boxes.toArray(new Position[0]), "", 0));
+        return solve(new Status(new Position(heroX, heroY), boxes.toArray(new Position[0]), "", 0), 1);
     }
 
-    private static String solve(Status status) {
+    private static String solve(Status status, int rate) {
         HashMap<Status, Boolean> visited = new HashMap<>();
         PriorityQueue<Status> queue = new PriorityQueue<>((a, b) ->
-                a.heuristic() * 2 + a.getCost() - b.heuristic() * 2 - b.getCost());
+                a.heuristic() * rate + a.getCost() - b.heuristic() * rate - b.getCost());
         queue.add(status);
         visited.put(status, true);
 
@@ -198,13 +199,16 @@ public abstract class Solver {
             }
 
             statusCount++;
-            if (System.currentTimeMillis() - startTime > SettingState.getSolverTimeLimit() * 1000) {
-                app.getStateManager().attach(new AlertState(
-                        "Time Out",
-                        "No solution found in " + SettingState.getSolverTimeLimit() + " seconds. " +
-                        statusCount + " status checked."
-                ));
-                return null;
+            if ((System.currentTimeMillis() - startTime) * MAX_RATE > SettingState.getSolverTimeLimit() * 1000) {
+                if (rate == MAX_RATE) {
+                    app.getStateManager().attach(new AlertState(
+                            "Time Out",
+                            "No solution found within " + SettingState.getSolverTimeLimit() + " seconds."
+                    ));
+                    return null;
+                } else {
+                    return solve(status, rate + 1);
+                }
             }
         }
 
