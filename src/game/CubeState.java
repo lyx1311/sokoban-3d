@@ -25,9 +25,10 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
+
 import main.AlertState;
 import main.Main;
-import org.lwjgl.Sys;
+import main.SettingState;
 
 public class CubeState extends BaseAppState {
     private static final String ARCHIVE_FILE_PATH = "archives/";
@@ -35,8 +36,6 @@ public class CubeState extends BaseAppState {
     private static final String IMAGE_PATH = "images/";
     private static final float EPS = 1e-4f;
     private static final float SIDE = 10f;
-    private static final float MOVE_DURATION = 0.8f;
-    private static final float ROTATE_DURATION = 1.5f;
     private static final Vector3f UNIT_U = new Vector3f(-1f, 0f, 0f);
     private static final Vector3f UNIT_D = new Vector3f(1f, 0f, 0f);
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
@@ -317,7 +316,7 @@ public class CubeState extends BaseAppState {
         // 判断是否可以移动
         if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] == '#' || map[x][y] == 'B') return false;
 
-        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, SettingState.getMoveSpeed());
 
         // 更新英雄位置
         heroX = x;
@@ -379,7 +378,7 @@ public class CubeState extends BaseAppState {
         }
 
         // 移动相机
-        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        if (showAnimation) cameraControl.moveCamera(startPosition, endPosition, SettingState.getMoveSpeed());
 
         // 更新英雄位置
         heroX = x;
@@ -466,7 +465,7 @@ public class CubeState extends BaseAppState {
         int x = heroX + Math.round(direction.x);
         int y = heroY - Math.round(direction.z);
 
-        cameraControl.moveCamera(startPosition, endPosition, MOVE_DURATION);
+        cameraControl.moveCamera(startPosition, endPosition, SettingState.getMoveSpeed());
 
         if (Character.isUpperCase(c)) {
             Vector3f boxDirection = charToDir(c);
@@ -500,7 +499,7 @@ public class CubeState extends BaseAppState {
 
         if (isSameRotation(currentRotation, newRotation)) return false;
 
-        cameraControl.rotateCamera(currentRotation, newRotation, ROTATE_DURATION);
+        cameraControl.rotateCamera(currentRotation, newRotation, SettingState.getRotateSpeed());
         return true;
     }
     public void rotateCamera(float angle) {
@@ -519,7 +518,7 @@ public class CubeState extends BaseAppState {
         Quaternion newRotation = new Quaternion().fromAngles(angles[0], newYaw, angles[2]);
 
         // 应用新的旋转角度到相机
-        cameraControl.rotateCamera(currentRotation, newRotation, ROTATE_DURATION);
+        cameraControl.rotateCamera(currentRotation, newRotation, SettingState.getRotateSpeed());
     }
 
     public void reverseFly() {
