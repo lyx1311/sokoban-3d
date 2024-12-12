@@ -123,7 +123,7 @@ public class GameState extends BaseAppState {
                         if (!cubeState.isFlying()) instructions.add(name);
                         break;
                     case "Fly":
-                        instructions.add(name);
+                        if (!isWorking()) cubeState.reverseFly();
                         break;
                 }
                 System.out.println("Camera position: " + app.getCamera().getLocation());
@@ -159,7 +159,6 @@ public class GameState extends BaseAppState {
                     break;
                 case "RotateLeft": cubeState.rotateCamera(90); break;
                 case "RotateRight": cubeState.rotateCamera(-90); break;
-                case "Fly": cubeState.reverseFly(); break;
                 case "Undo":
                     cubeState.undo();
                     if (isMenuOpen) menuState.updateSteps();
