@@ -41,6 +41,7 @@ public class CubeState extends BaseAppState {
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
     private static final Vector3f UNIT_R = new Vector3f(0f, 0f, -1f);
     private static final Vector3f sunLightDir = new Vector3f(-0.65f, -0.12f, 0.75f);
+    public static final float MAX_HEIGHT = 150f;
 
     private Application app;
     private AssetManager assetManager;
@@ -138,7 +139,7 @@ public class CubeState extends BaseAppState {
         placeCube((x + 1) * SIDE * 2, SIDE, -(y + 1) * SIDE * 2, SIDE, "Wall");
     }
     private void placeGoal(int x, int y) {
-        placeGoal((x + 1) * SIDE * 2, SIDE * 0.99f, -(y + 1) * SIDE * 2, SIDE * 0.99f);
+        placeGoal((x + 1) * SIDE * 2, -(y + 1) * SIDE * 2, SIDE * 0.99f);
     }
 
     private int hashId(int x, int y) { return x * cols + y; }
@@ -178,9 +179,9 @@ public class CubeState extends BaseAppState {
 //        mat.setBoolean("UseMaterialColors", true);
 //        return mat;
 //    }
-    private void placeGoal(float x, float y, float z, float side) {
+    private void placeGoal(float x, float z, float side) {
         // 创建一个柱体
-        Geometry holyLight = new Geometry("HolyLight", new Box(side, 1000, side));
+        Geometry holyLight = new Geometry("HolyLight", new Box(side, MAX_HEIGHT, side));
 
         // 创建材质
         Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -190,7 +191,7 @@ public class CubeState extends BaseAppState {
         holyLight.setMaterial(material); // 设置材质
         holyLight.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
 
-        holyLight.setLocalTranslation(x, 1000, z); // 设置位置
+        holyLight.setLocalTranslation(x, MAX_HEIGHT, z); // 设置位置
         rootNode.attachChild(holyLight); // 添加到场景
 
         // 在地面上对应位置添加一个矩形
@@ -525,15 +526,23 @@ public class CubeState extends BaseAppState {
         if (inMotion()) throw new IllegalStateException("Camera is in motion.");
 
         if (isFlying()) {
-            if(!isWin) cameraControl.stopFly();
+            if (!isWin) {
+                cameraControl.stopFly();
+                filterState.add(ssao);
+            }
         } else {
             cameraControl.startFly();
+            filterState.remove(ssao);
         }
     }
     public void startMoveFlyCam(String instruction) {
-        Vector3f direction = app.getCamera().getDirection().clone();
-        direction.y = 0;
-        cameraControl.startMoveFlyCam(strToDir(direction, instruction));
+        if (instruction.equals("PushBox")) {
+            cameraControl.startMoveFlyCam(new Vector3f(0, 1, 0));
+        } else {
+            Vector3f direction = app.getCamera().getDirection().clone();
+            direction.y = 0;
+            cameraControl.startMoveFlyCam(strToDir(direction, instruction));
+        }
     }
     public void stopMoveFlyCam() { cameraControl.stopMoveFlyCam(); }
 
@@ -692,8 +701,6 @@ public class CubeState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        super.update(tpf);
-
         // 同步摄像机位置和旋转
         app.getCamera().setLocation(cameraNode.getWorldTranslation());
         app.getCamera().setRotation(cameraNode.getWorldRotation());
@@ -712,7 +719,7 @@ public class CubeState extends BaseAppState {
     protected void onDisable() {
         SimpleApplication app = (SimpleApplication) this.app;
 
-        app.getRootNode().detachChild(rootNode);
+        rootNode.removeFromParent();
         app.getRootNode().removeLight(ambientLight);
         app.getRootNode().removeLight(sunLight);
 

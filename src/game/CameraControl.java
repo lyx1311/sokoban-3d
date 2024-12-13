@@ -40,7 +40,7 @@ public class CameraControl extends AbstractControl {
         originLocation = spatial.getLocalTranslation().clone();
         originRotation = spatial.getLocalRotation().clone();
         isFlying = true;
-        spatial.setLocalTranslation(new Vector3f(60f, 120f, 60f));
+        spatial.setLocalTranslation(new Vector3f(40f, 100f, 40f));
         spatial.setLocalRotation(new Quaternion(0f, 0.93f, -0.37f, 0f));
     }
     public void stopFly() {
@@ -80,7 +80,8 @@ public class CameraControl extends AbstractControl {
             }
         }
 
-        if (moveDirection != null) {
+        if (moveDirection != null && spatial.getLocalTranslation().add(moveDirection.mult(FLY_CAM_MOVE_SPEED * tpf)).y
+                < CubeState.MAX_HEIGHT * 2) {
             spatial.move(moveDirection.mult(FLY_CAM_MOVE_SPEED * tpf));
         }
     }

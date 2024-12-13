@@ -99,7 +99,7 @@ public class GameState extends BaseAppState {
                 }
                 if (isSolving || isSolverWorking) return;
                 switch (name) {
-                    case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
+                    case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight": case "PushBox":
                         System.out.println(" > " + name);
                         if (cubeState.isFlying()) {
                             cubeState.startMoveFlyCam(name);
@@ -114,7 +114,7 @@ public class GameState extends BaseAppState {
                             instructions.add(name);
                         }
                         break;
-                    case "PushBox": case "Undo":
+                    case "Undo":
                         if (!cubeState.isFlying()) instructions.add(name);
                         break;
                     case "Fly":
@@ -125,7 +125,7 @@ public class GameState extends BaseAppState {
                 System.out.println("Camera rotation: " + app.getCamera().getRotation());
             } else {
                 switch (name) {
-                    case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight":
+                    case "MoveForward": case "MoveBackward": case "MoveLeft": case "MoveRight": case "PushBox":
                         if (cubeState.isFlying()) cubeState.stopMoveFlyCam();
                         break;
                 }
