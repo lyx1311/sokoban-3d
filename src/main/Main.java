@@ -17,14 +17,10 @@ public class Main extends SimpleApplication {
         settings.setResolution(1600, 900); // 设置分辨率为屏幕分辨率
         settings.setResizable(true); // 缩放窗口
         settings.setTitle("SOKOBAN!"); // 设置窗口标题
-
         // 启动程序
         app.setSettings(settings);
         app.setShowSettings(false);
         app.start();
-
-        // 移除空格键的默认映射
-        app.getInputManager().deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
     }
 
     @Override
@@ -37,9 +33,18 @@ public class Main extends SimpleApplication {
 
         // 创建背景图片
         Main.createBackground(this);
-        //使背景图片适应屏幕大小
+
+        // 使背景图片适应屏幕大小
         viewPort.setBackgroundColor(new com.jme3.math.ColorRGBA(0.7f, 0.8f, 1f, 1f));
-     }
+
+        // 删除 ESC、F5 键的默认行为
+        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
+        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_HIDE_STATS);
+
+        // 隐藏左下角的帧率显示和统计信息
+        setDisplayFps(false);
+        setDisplayStatView(false);
+    }
 
     private static Picture background = null;
     public static void createBackground(Application app) {
