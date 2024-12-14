@@ -2,6 +2,14 @@ package main;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.light.DirectionalLight;
+import com.jme3.material.Material;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.ui.Picture;
 
@@ -30,51 +38,51 @@ public class Main extends SimpleApplication {
 
         // 初始化相机
         flyCam.setMoveSpeed(50f);
-        flyCam.setDragToRotate(false);
+        flyCam.setDragToRotate(true);
+        flyCam.setEnabled(false);
 
         // 创建背景图片
         Main.createBackground(this);
 
-        // 使背景图片适应屏幕大小
-        viewPort.setBackgroundColor(new com.jme3.math.ColorRGBA(0.7f, 0.8f, 1f, 1f));
-
         // 删除 ESC、F5 键的默认行为
-        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
-        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_HIDE_STATS);
+        inputManager.clearMappings();
+//        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
+//        inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_HIDE_STATS);
 
         // 隐藏左下角的帧率显示和统计信息
         setDisplayFps(false);
         setDisplayStatView(false);
     }
 
-    private static Picture background = null;
+    private static Geometry cubeGeo;
     public static void createBackground(Application app) {
-        float width = app.getCamera().getWidth();
-        float height = app.getCamera().getHeight();
-
-        // 创建 Picture 对象
-        background = new Picture("Background");
-        background.setImage(app.getAssetManager(), "interface.jpg", true); // 替换为你的图片路径
-        background.setWidth(width);
-        background.setHeight(height);
-        float x = 0.5f * (app.getCamera().getWidth() - width);
-        float y = 0.5f * (app.getCamera().getHeight() - height);
-
-        // 设置位置，确保背景图片在最底层
-        background.setLocalTranslation(x, y, -1);
-
-        // 将背景添加到 GUI 节点
-        if (app instanceof SimpleApplication) {
-            ((SimpleApplication) app).getGuiNode().attachChild(background);
-        } else {
-            throw new IllegalArgumentException("Application is not an instance of SimpleApplication");
-        }
+        Mesh cube = new Box(1, 1, 1);
+        cubeGeo = new Geometry("Cube", cube);
+        ((SimpleApplication) app).getRootNode().attachChild(cubeGeo);
+        Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
+        mat.setTexture("DiffuseMap", app.getAssetManager().loadTexture("images/box - interface.png"));
+        cubeGeo.setMaterial(mat);
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-1, -2, -3));
+        ((SimpleApplication) app).getRootNode().addLight(sun);
+        app.getCamera().setLocation(new Vector3f(2.9757807f, 4.9841127f, 7.189121f));
+        app.getCamera().setRotation(new Quaternion(-0.07631536f, 0.92353964f, -0.2741623f, -0.2570712f));
     }
     public static void removeBackground() {
-        if (background != null) {
-            background.removeFromParent();
+        if (cubeGeo != null) {
+            cubeGeo.removeFromParent();
         } else {
             throw new IllegalStateException("Background not found");
+        }
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        if (cubeGeo != null) {
+            // 旋转速度：每秒360°
+            float speed = FastMath.HALF_PI;
+            // 让方块匀速旋转
+            cubeGeo.rotate(0, tpf * speed, 0);
         }
     }
 

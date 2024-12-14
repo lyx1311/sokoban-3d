@@ -41,24 +41,24 @@ public class MainMenuState extends BaseAppState {
 
     private void initGui() {
         logInPicture = new Picture("LogIn");
-        logInPicture.setImage(app.getAssetManager(), "icon.png", true);
-        logInPicture.setWidth(200);
+        logInPicture.setImage(app.getAssetManager(), "icon login.png", true);
+        logInPicture.setWidth(404);
         logInPicture.setHeight(200);
-        logInPicture.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0);
+        logInPicture.setLocalTranslation(10, app.getCamera().getHeight() - 250, 0);
         guiNode.attachChild(logInPicture);
 
         registerPicture = new Picture("Register");
-        registerPicture.setImage(app.getAssetManager(), "icon.png", true);
-        registerPicture.setWidth(200);
+        registerPicture.setImage(app.getAssetManager(), "icon register.png", true);
+        registerPicture.setWidth(457);
         registerPicture.setHeight(200);
-        registerPicture.setLocalTranslation(10, app.getCamera().getHeight() - 450, 0);
+        registerPicture.setLocalTranslation(10, app.getCamera().getHeight() - 500, 0);
         guiNode.attachChild(registerPicture);
 
         visitorPicture = new Picture("Visitor");
-        visitorPicture.setImage(app.getAssetManager(), "icon.png", true);
-        visitorPicture.setWidth(200);
+        visitorPicture.setImage(app.getAssetManager(), "icon play as visitor.png", true);
+        visitorPicture.setWidth(439);
         visitorPicture.setHeight(200);
-        visitorPicture.setLocalTranslation(10, app.getCamera().getHeight() - 700, 0);
+        visitorPicture.setLocalTranslation(10, app.getCamera().getHeight() - 750, 0);
         guiNode.attachChild(visitorPicture);
     }
 

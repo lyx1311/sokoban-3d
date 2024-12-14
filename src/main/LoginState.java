@@ -43,16 +43,16 @@ public class LoginState extends BaseAppState {
         loginForm = new Container();
         guiNode.attachChild(loginForm);
 
-        loginForm.addChild(new Label("Username:")).setFontSize(24);
+        loginForm.addChild(new Label("Username:")).setFontSize(40);
         TextField usernameField = loginForm.addChild(new TextField(username));
 
-        loginForm.addChild(new Label("Password:")).setFontSize(24);
+        loginForm.addChild(new Label("Password:")).setFontSize(40);
         PasswordField passwordField = loginForm.addChild(new PasswordField(password));
 
         Button loginButton = loginForm.addChild(new Button("Log In"));
-        loginButton.setFontSize(24);
+        loginButton.setFontSize(40);
         Button backButton = loginForm.addChild(new Button("Back"));
-        backButton.setFontSize(24);
+        backButton.setFontSize(40);
 
         // 事件绑定
         loginButton.addClickCommands(source -> {
@@ -88,7 +88,7 @@ public class LoginState extends BaseAppState {
         });
 
         // 设置窗口位置
-        loginForm.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);
+        loginForm.setLocalTranslation(250, app.getCamera().getHeight() -200, 0);
     }
 
     // 验证用户凭证

@@ -49,19 +49,23 @@ public class RegisterState extends BaseAppState {
         registerForm = new Container();
         guiNode.attachChild(registerForm);
 
-        registerForm.addChild(new Label("Username:")).setFontSize(24);
+        registerForm.addChild(new Label("Username:")).setFontSize(40);
         TextField usernameField = registerForm.addChild(new TextField(username));
+        usernameField.setFontSize(40);
 
-        registerForm.addChild(new Label("Password:")).setFontSize(24);
+        registerForm.addChild(new Label("Password:")).setFontSize(40);
         PasswordField passwordField = registerForm.addChild(new PasswordField(password));
+        passwordField.setFontSize(40);
 
-        registerForm.addChild(new Label("Confirm Password:")).setFontSize(24);
+        registerForm.addChild(new Label("Confirm Password:")).setFontSize(40);
         PasswordField confirmPasswordField = registerForm.addChild(new PasswordField(confirmPassword));
+        confirmPasswordField.setFontSize(40);
 
         Button registerButton = registerForm.addChild(new Button("Register"));
-        registerButton.setFontSize(24);
+        registerButton.setFontSize(40);
+
         Button backButton = registerForm.addChild(new Button("Back"));
-        backButton.setFontSize(24);
+        backButton.setFontSize(40);
 
         // 事件绑定
         registerButton.addClickCommands(source -> {
@@ -132,7 +136,7 @@ public class RegisterState extends BaseAppState {
         });
 
         // 设置窗口位置
-        registerForm.setLocalTranslation(10, app.getCamera().getHeight() - 10, 0);
+        registerForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
     }
 
     // 检查用户名是否符合要求
