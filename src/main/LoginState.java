@@ -3,6 +3,7 @@ package main;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
@@ -25,10 +26,12 @@ public class LoginState extends BaseAppState {
 
     private Application app;
     private Node guiNode;
+    private InputManager inputManager;
     private Container loginForm;
     private String username = "", password = "";
-    private Picture lIPicture;
-    private Picture BPicture;
+    private TextField usernameField;
+    private PasswordField passwordField;
+    private Picture logInPicture, backPicture;
 
     @Override
     protected void initialize(Application app) {
@@ -38,6 +41,7 @@ public class LoginState extends BaseAppState {
             throw new IllegalArgumentException("Application must be an instance of SimpleApplication.");
         }
         guiNode = ((SimpleApplication) app).getGuiNode();
+        inputManager = app.getInputManager();
 
         // 初始化 Lemur GUI
         GuiGlobals.initialize(app);
@@ -50,72 +54,40 @@ public class LoginState extends BaseAppState {
         guiNode.attachChild(loginForm);
 
         loginForm.addChild(new Label("Username:")).setFontSize(40);
-        TextField usernameField = loginForm.addChild(new TextField(username), 1);
+        usernameField = loginForm.addChild(new TextField(username), 1);
         usernameField.setPreferredWidth(200);
         usernameField.setFontSize(40);
 
         loginForm.addChild(new Label("Password:")).setFontSize(40);
-        PasswordField passwordField = loginForm.addChild(new PasswordField(password), 1);
+        passwordField = loginForm.addChild(new PasswordField(password), 1);
         passwordField.setPreferredWidth(200);
         passwordField.setFontSize(40);
 
-        lIPicture = new Picture("LogIn");
-        lIPicture.setImage(app.getAssetManager(), "buttonlogin.png", true);
-        lIPicture.setWidth(404);
-        lIPicture.setHeight(200);
-        lIPicture.setLocalTranslation(230, app.getCamera().getHeight() - 500, 0);
-        guiNode.attachChild(lIPicture);
+        logInPicture = new Picture("LogIn");
+        logInPicture.setImage(app.getAssetManager(), "buttonlogin.png", true);
+        logInPicture.setWidth(404);
+        logInPicture.setHeight(200);
+        logInPicture.setLocalTranslation(230, app.getCamera().getHeight() - 500, 0);
+        guiNode.attachChild(logInPicture);
 
-        BPicture = new Picture("LogIn");
-        BPicture.setImage(app.getAssetManager(), "buttonback.png", true);
-        BPicture.setWidth(404);
-        BPicture.setHeight(200);
-        BPicture.setLocalTranslation(230, app.getCamera().getHeight() - 650, 0);
-        guiNode.attachChild(BPicture);
-
-
-        /*Button loginButton = loginForm.addChild(new Button("Log In"));
-        loginButton.setFontSize(40);
-        Button backButton = loginForm.addChild(new Button("Back"));
-        backButton.setFontSize(40);*/
-
-        // 事件绑定
-        /*loginButton.addClickCommands(source -> {
-            username = usernameField.getText().trim();
-            password = passwordField.getText();
-
-            if (authenticateUser(username, password)) {
-                getStateManager().attach(new AlertState(
-                        "Login Successful",
-                        "Welcome, " + username + "!"
-                ));
-                checkArchive(username); // 检查用户存档
-
-                Main.username = username; // 设置当前用户名
-
-                getStateManager().detach(this);
-                getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
-                cleanup(); // 清理资源
-            } else {
-                getStateManager().attach(new AlertState(
-                        "Login Failed",
-                        "Invalid username or password!"
-                ));
-            }
-
-            onDisable();
-            onEnable();
-        });
-        backButton.addClickCommands(source -> {
-            getStateManager().detach(this);
-            getStateManager().attach(new MainMenuState()); // 返回主菜单
-            cleanup(); // 清理资源
-        });*/
+        backPicture = new Picture("Back");
+        backPicture.setImage(app.getAssetManager(), "buttonback.png", true);
+        backPicture.setWidth(404);
+        backPicture.setHeight(200);
+        backPicture.setLocalTranslation(230, app.getCamera().getHeight() - 650, 0);
+        guiNode.attachChild(backPicture);
 
         // 设置窗口位置
-        loginForm.setLocalTranslation(250, app.getCamera().getHeight() -200, 0);
+        loginForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
     }
+    // 初始化输入
+    private void initInput() {
+        app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        app.getInputManager().addListener(actionListener, "Click");
+    }
+
     private final ActionListener actionListener = new ActionListener() {
+        @Override
         public void onAction(String name, boolean isPressed, float tpf) {
             if (name.equals("Click") && !isPressed) {
                 // 获取鼠标点击位置
@@ -123,12 +95,35 @@ public class LoginState extends BaseAppState {
                 float y = app.getInputManager().getCursorPosition().y;
 
                 // 检查点击位置是否在图片范围内
-                if (Main.inPicture(lIPicture, x, y)) {
+                if (Main.inPicture(logInPicture, x, y)) {
+                    username = usernameField.getText().trim();
+                    password = passwordField.getText();
+
+                    if (authenticateUser(username, password)) {
+                        getStateManager().attach(new AlertState(
+                                "Login Successful",
+                                "Welcome, " + username + "!"
+                        ));
+                        checkArchive(username); // 检查用户存档
+
+                        Main.username = username; // 设置当前用户名
+
+                        getStateManager().detach(LoginState.this); // 移除当前状态
+                        getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
+                        cleanup(); // 清理资源
+                    } else {
+                        getStateManager().attach(new AlertState(
+                                "Login Failed",
+                                "Invalid username or password!"
+                        ));
+                    }
+
+                    onDisable();
+                    onEnable();
+                } else if (Main.inPicture(backPicture, x, y)) {
                     getStateManager().detach(LoginState.this); // 移除当前状态
-                    getStateManager().attach(new LoginState()); // 切换到登
-                } else if (Main.inPicture(BPicture, x, y)) {
-                    getStateManager().detach(LoginState.this);
-                    getStateManager().attach(new RegisterState());
+                    getStateManager().attach(new MainMenuState()); // 返回主菜单
+                    cleanup(); // 清理资源
                 }
             }
         }
@@ -168,16 +163,20 @@ public class LoginState extends BaseAppState {
     @Override
     public void onEnable() {
         initGui(); // 初始化 GUI
-        guiNode.attachChild(loginForm); // 将表单添加到 GUI 节点
+        initInput(); // 初始化输入
     }
 
     @Override
     public void onDisable() {
-        for (Spatial child : loginForm.getChildren()) {
-            if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
-        }
+        for (Spatial child : loginForm.getChildren()) child.removeFromParent();
+
         loginForm.detachAllChildren(); // 移除表单的所有子节点
         loginForm.removeFromParent(); // 将表单从 GUI 节点移除
+        logInPicture.removeFromParent(); // 将登录按钮从 GUI 节点移除
+        backPicture.removeFromParent(); // 将返回按钮从 GUI 节点移除
+
+        inputManager.removeListener(actionListener);
+        inputManager.clearMappings();
     }
 
     @Override

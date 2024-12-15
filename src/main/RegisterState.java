@@ -3,8 +3,13 @@ package main;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.InputManager;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.ui.Picture;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -27,8 +32,12 @@ public class RegisterState extends BaseAppState {
 
     private Application app;
     private Node guiNode;
+    private InputManager inputManager;
     private Container registerForm;
     private String username = "", password = "", confirmPassword = "";
+    private TextField usernameField;
+    private PasswordField passwordField, confirmPasswordField;
+    private Picture registerPicture, backPicture;
 
     @Override
     protected void initialize(Application app) {
@@ -38,6 +47,7 @@ public class RegisterState extends BaseAppState {
             throw new IllegalArgumentException("Application must be an instance of SimpleApplication.");
         }
         guiNode = ((SimpleApplication) app).getGuiNode();
+        inputManager = app.getInputManager();
 
         // 初始化 Lemur GUI
         GuiGlobals.initialize(app);
@@ -50,94 +60,116 @@ public class RegisterState extends BaseAppState {
         guiNode.attachChild(registerForm);
 
         registerForm.addChild(new Label("Username:")).setFontSize(40);
-        TextField usernameField = registerForm.addChild(new TextField(username));
+        usernameField = registerForm.addChild(new TextField(username), 1);
+        usernameField.setPreferredWidth(200);
         usernameField.setFontSize(40);
 
         registerForm.addChild(new Label("Password:")).setFontSize(40);
-        PasswordField passwordField = registerForm.addChild(new PasswordField(password));
+        passwordField = registerForm.addChild(new PasswordField(password), 1);
+        passwordField.setPreferredWidth(200);
         passwordField.setFontSize(40);
 
         registerForm.addChild(new Label("Confirm Password:")).setFontSize(40);
-        PasswordField confirmPasswordField = registerForm.addChild(new PasswordField(confirmPassword));
+        confirmPasswordField = registerForm.addChild(new PasswordField(confirmPassword), 1);
+        confirmPasswordField.setPreferredWidth(200);
         confirmPasswordField.setFontSize(40);
 
-        Button registerButton = registerForm.addChild(new Button("Register"));
-        registerButton.setFontSize(40);
+        registerPicture = new Picture("Register");
+        registerPicture.setImage(app.getAssetManager(), "buttonregister.png", true);
+        registerPicture.setWidth(404);
+        registerPicture.setHeight(200);
+        registerPicture.setLocalTranslation(210, app.getCamera().getHeight() - 650, 0);
+        guiNode.attachChild(registerPicture);
 
-        Button backButton = registerForm.addChild(new Button("Back"));
-        backButton.setFontSize(40);
-
-        // 事件绑定
-        registerButton.addClickCommands(source -> {
-            username = usernameField.getText().trim();
-            password = passwordField.getText();
-            confirmPassword = confirmPasswordField.getText();
-
-            if (username.length() < MIN_USERNAME_LENGTH || username.length() > MAX_USERNAME_LENGTH) {
-                getStateManager().attach(new AlertState(
-                        "Registration Failed",
-                        "Username must be between " + MIN_USERNAME_LENGTH + " and " +
-                        MAX_USERNAME_LENGTH + " characters!"
-                ));
-            } else if (!isUsernameValid(username)) {
-                getStateManager().attach(new AlertState(
-                        "Registration Failed",
-                        "Username must start with a letter or underscore, and only " +
-                        "contain letters, digits, and underscores."
-                ));
-            } else if (isUserExists(username) || username.equals("Visitor")) {
-                getStateManager().attach(new AlertState(
-                        "Registration Failed",
-                        "Username already exists!"
-                ));
-            } else if (!password.equals(confirmPassword)) {
-                getStateManager().attach(new AlertState(
-                        "Registration Failed",
-                        "Passwords do not match!"
-                ));
-            } else if (password.length() < MIN_PASSWORD_LENGTH || password.length() > MAX_PASSWORD_LENGTH) {
-                getStateManager().attach(new AlertState(
-                        "Registration Failed",
-                        "Password must be between " + MIN_PASSWORD_LENGTH + " and " +
-                        MAX_PASSWORD_LENGTH + " characters!"
-                ));
-            } else if (!isPasswordValid(password)) {
-                getStateManager().attach(new AlertState(
-                        "Registration Failed",
-                        "Password must contain at least two of the following: " +
-                        "lowercase letters, uppercase letters, digits, and special characters."
-                ));
-            } else {
-                try {
-                    saveUser(username, password);
-                    getStateManager().attach(new AlertState(
-                            "Registration Successful",
-                            "User registered successfully!"
-                    ));
-                    createUserArchive(username);
-
-                    Main.username = username; // 设置当前用户名
-
-                    getStateManager().detach(this);
-                    getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
-                    cleanup(); // 清理资源
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            onDisable();
-            onEnable();
-        });
-        backButton.addClickCommands(source -> {
-            getStateManager().detach(this);
-            getStateManager().attach(new MainMenuState()); // 返回主菜单
-            cleanup(); // 清理资源
-        });
+        backPicture = new Picture("Back");
+        backPicture.setImage(app.getAssetManager(), "buttonback.png", true);
+        backPicture.setWidth(404);
+        backPicture.setHeight(200);
+        backPicture.setLocalTranslation(190, app.getCamera().getHeight() - 800, 0);
+        guiNode.attachChild(backPicture);
 
         // 设置窗口位置
         registerForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
     }
+    private void initInput() {
+        app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        app.getInputManager().addListener(actionListener, "Click");
+    }
+
+    private final ActionListener actionListener = new ActionListener() {
+        @Override
+        public void onAction(String name, boolean isPressed, float tpf) {
+            if (name.equals("Click") && !isPressed) {
+                // 获取鼠标点击位置
+                float x = app.getInputManager().getCursorPosition().x;
+                float y = app.getInputManager().getCursorPosition().y;
+
+                // 检查点击位置是否在图片范围内
+                if (Main.inPicture(registerPicture, x, y)) {
+                    username = usernameField.getText().trim();
+                    password = passwordField.getText();
+                    confirmPassword = confirmPasswordField.getText();
+
+                    if (username.length() < MIN_USERNAME_LENGTH || username.length() > MAX_USERNAME_LENGTH) {
+                        getStateManager().attach(new AlertState(
+                                "Registration Failed",
+                                "Username must be between " + MIN_USERNAME_LENGTH + " and " +
+                                        MAX_USERNAME_LENGTH + " characters!"
+                        ));
+                    } else if (!isUsernameValid(username)) {
+                        getStateManager().attach(new AlertState(
+                                "Registration Failed",
+                                "Username must start with a letter or underscore, and only " +
+                                        "contain letters, digits, and underscores."
+                        ));
+                    } else if (isUserExists(username) || username.equals("Visitor")) {
+                        getStateManager().attach(new AlertState(
+                                "Registration Failed",
+                                "Username already exists!"
+                        ));
+                    } else if (!password.equals(confirmPassword)) {
+                        getStateManager().attach(new AlertState(
+                                "Registration Failed",
+                                "Passwords do not match!"
+                        ));
+                    } else if (password.length() < MIN_PASSWORD_LENGTH || password.length() > MAX_PASSWORD_LENGTH) {
+                        getStateManager().attach(new AlertState(
+                                "Registration Failed",
+                                "Password must be between " + MIN_PASSWORD_LENGTH + " and " +
+                                        MAX_PASSWORD_LENGTH + " characters!"
+                        ));
+                    } else if (!isPasswordValid(password)) {
+                        getStateManager().attach(new AlertState(
+                                "Registration Failed",
+                                "Password must contain at least two of the following: " +
+                                        "lowercase letters, uppercase letters, digits, and special characters."
+                        ));
+                    } else {
+                        try {
+                            saveUser(username, password);
+                            getStateManager().attach(new AlertState(
+                                    "Registration Successful",
+                                    "User registered successfully!"
+                            ));
+                            createUserArchive(username);
+
+                            Main.username = username; // 设置当前用户名
+
+                            getStateManager().detach(RegisterState.this);
+                            getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
+                            cleanup(); // 清理资源
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else if (Main.inPicture(backPicture, x, y)) {
+                    getStateManager().detach(RegisterState.this);
+                    getStateManager().attach(new MainMenuState()); // 返回主菜单
+                    cleanup(); // 清理资源}
+                }
+            }
+        }
+    };
 
     // 检查用户名是否符合要求
     public boolean isUsernameValid(String username) {
@@ -212,16 +244,18 @@ public class RegisterState extends BaseAppState {
     @Override
     public void onEnable() {
         initGui(); // 初始化 GUI
-        guiNode.attachChild(registerForm); // 将表单添加到 GUI 节点
+        initInput(); // 初始化输入
     }
 
     @Override
     public void onDisable() {
-        for (Spatial child : registerForm.getChildren()) {
-            if (child instanceof Button) ((Button) child).setEnabled(false); // 禁用按钮
-        }
-         registerForm.detachAllChildren(); // 移除表单的所有子节点
-         registerForm.removeFromParent(); // 将表单从 GUI 节点移除
+        registerForm.detachAllChildren(); // 移除表单的所有子节点
+        registerForm.removeFromParent(); // 将表单从 GUI 节点移除
+        registerPicture.removeFromParent();
+        backPicture.removeFromParent();
+
+        inputManager.removeListener(actionListener);
+        inputManager.clearMappings();
     }
 
     @Override

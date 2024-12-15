@@ -8,20 +8,15 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class MainMenuState extends BaseAppState {
     private Application app;
     private Node guiNode;
-    private Picture logInPicture;
-    private Picture registerPicture;
-    private Picture visitorPicture;
     private InputManager inputManager;
+    private Picture logInPicture, registerPicture, visitorPicture;
 
     @Override
     protected void initialize(Application app) {
