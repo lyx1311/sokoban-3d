@@ -49,4 +49,4 @@ crashlytics-build.properties
 fabric.properties
 
 # Ignore test files
-src/test/
+src/test/**
