@@ -55,6 +55,7 @@ public class Main extends SimpleApplication {
     }
 
     private static Geometry cubeGeo;
+    private static DirectionalLight cubeLight;
     public static void createBackground(Application app) {
         Mesh cube = new Box(1, 1, 1);
         cubeGeo = new Geometry("Cube", cube);
@@ -62,15 +63,22 @@ public class Main extends SimpleApplication {
         Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
         mat.setTexture("DiffuseMap", app.getAssetManager().loadTexture("images/box - interface.png"));
         cubeGeo.setMaterial(mat);
-        DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-1, -2, -3));
-        ((SimpleApplication) app).getRootNode().addLight(sun);
-        app.getCamera().setLocation(new Vector3f(2.9757807f, 4.9841127f, 7.189121f));
-        app.getCamera().setRotation(new Quaternion(-0.07631536f, 0.92353964f, -0.2741623f, -0.2570712f));
+        cubeLight = new DirectionalLight();
+        cubeLight.setDirection(new Vector3f(-1, -2, -3));
+        ((SimpleApplication) app).getRootNode().addLight(cubeLight);
+        app.getCamera().setLocation(new Vector3f(2.98f, 4.98f, 7.19f));
+        app.getCamera().setRotation(new Quaternion(-0.08f, 0.92f, -0.27f, -0.26f));
     }
-    public static void removeBackground() {
+    public static void removeBackground(Application app) {
         if (cubeGeo != null) {
             cubeGeo.removeFromParent();
+            cubeGeo = null;
+
+            if (app instanceof SimpleApplication) {
+                ((SimpleApplication) app).getRootNode().removeLight(cubeLight);
+            } else {
+                throw new IllegalStateException("Application is not an instance of SimpleApplication");
+            }
         } else {
             throw new IllegalStateException("Background not found");
         }
