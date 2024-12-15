@@ -101,6 +101,7 @@ public class SettingState extends BaseAppState {
     }
 
     private void setStyle(Slider slider, float delta) {
+        slider.setPreferredSize(new Vector3f(200, 32, 1));
         slider.getThumbButton().setSize(new Vector3f(12, 32, 1));
         slider.getThumbButton().setFontSize(20);
         slider.getDecrementButton().setFontSize(24);

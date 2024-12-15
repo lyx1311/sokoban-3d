@@ -3,8 +3,12 @@ package main;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.ui.Picture;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -23,6 +27,8 @@ public class LoginState extends BaseAppState {
     private Node guiNode;
     private Container loginForm;
     private String username = "", password = "";
+    private Picture lIPicture;
+    private Picture BPicture;
 
     @Override
     protected void initialize(Application app) {
@@ -44,18 +50,37 @@ public class LoginState extends BaseAppState {
         guiNode.attachChild(loginForm);
 
         loginForm.addChild(new Label("Username:")).setFontSize(40);
-        TextField usernameField = loginForm.addChild(new TextField(username));
+        TextField usernameField = loginForm.addChild(new TextField(username), 1);
+        usernameField.setPreferredWidth(200);
+        usernameField.setFontSize(40);
 
         loginForm.addChild(new Label("Password:")).setFontSize(40);
-        PasswordField passwordField = loginForm.addChild(new PasswordField(password));
+        PasswordField passwordField = loginForm.addChild(new PasswordField(password), 1);
+        passwordField.setPreferredWidth(200);
+        passwordField.setFontSize(40);
 
-        Button loginButton = loginForm.addChild(new Button("Log In"));
+        lIPicture = new Picture("LogIn");
+        lIPicture.setImage(app.getAssetManager(), "buttonlogin.png", true);
+        lIPicture.setWidth(404);
+        lIPicture.setHeight(200);
+        lIPicture.setLocalTranslation(230, app.getCamera().getHeight() - 500, 0);
+        guiNode.attachChild(lIPicture);
+
+        BPicture = new Picture("LogIn");
+        BPicture.setImage(app.getAssetManager(), "buttonback.png", true);
+        BPicture.setWidth(404);
+        BPicture.setHeight(200);
+        BPicture.setLocalTranslation(230, app.getCamera().getHeight() - 650, 0);
+        guiNode.attachChild(BPicture);
+
+
+        /*Button loginButton = loginForm.addChild(new Button("Log In"));
         loginButton.setFontSize(40);
         Button backButton = loginForm.addChild(new Button("Back"));
-        backButton.setFontSize(40);
+        backButton.setFontSize(40);*/
 
         // 事件绑定
-        loginButton.addClickCommands(source -> {
+        /*loginButton.addClickCommands(source -> {
             username = usernameField.getText().trim();
             password = passwordField.getText();
 
@@ -85,12 +110,29 @@ public class LoginState extends BaseAppState {
             getStateManager().detach(this);
             getStateManager().attach(new MainMenuState()); // 返回主菜单
             cleanup(); // 清理资源
-        });
+        });*/
 
         // 设置窗口位置
         loginForm.setLocalTranslation(250, app.getCamera().getHeight() -200, 0);
     }
+    private final ActionListener actionListener = new ActionListener() {
+        public void onAction(String name, boolean isPressed, float tpf) {
+            if (name.equals("Click") && !isPressed) {
+                // 获取鼠标点击位置
+                float x = app.getInputManager().getCursorPosition().x;
+                float y = app.getInputManager().getCursorPosition().y;
 
+                // 检查点击位置是否在图片范围内
+                if (Main.inPicture(lIPicture, x, y)) {
+                    getStateManager().detach(LoginState.this); // 移除当前状态
+                    getStateManager().attach(new LoginState()); // 切换到登
+                } else if (Main.inPicture(BPicture, x, y)) {
+                    getStateManager().detach(LoginState.this);
+                    getStateManager().attach(new RegisterState());
+                }
+            }
+        }
+    };
     // 验证用户凭证
     private boolean authenticateUser(String username, String password) {
         File file = new File(USER_LIST_FILE);

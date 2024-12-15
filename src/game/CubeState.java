@@ -529,10 +529,12 @@ public class CubeState extends BaseAppState {
             if (!isWin) {
                 cameraControl.stopFly();
                 filterState.add(ssao);
+                Monkey.remove();
             }
         } else {
             cameraControl.startFly();
             filterState.remove(ssao);
+            Monkey.add(app, 2 * (heroX + 1) * SIDE, 0, -2 * (heroY + 1) * SIDE, app.getCamera().getRotation());
         }
     }
     public void startMoveFlyCam(String instruction) {

@@ -40,7 +40,7 @@ public class CameraControl extends AbstractControl {
         originLocation = spatial.getLocalTranslation().clone();
         originRotation = spatial.getLocalRotation().clone();
         isFlying = true;
-        spatial.setLocalTranslation(new Vector3f(40f, 100f, 40f));
+        spatial.setLocalTranslation(new Vector3f(40f, 40f, 40f));
         spatial.setLocalRotation(new Quaternion(0f, 0.93f, -0.37f, 0f));
     }
     public void stopFly() {
