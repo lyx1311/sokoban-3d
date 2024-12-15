@@ -56,7 +56,7 @@ public class LevelSelectionState extends BaseAppState {
             levelButton.setFontSize(24);
             final int level = i;
             levelButton.addClickCommands(source -> {
-                Main.removeBackground(); // 移除背景图片
+                Main.removeBackground(app); // 移除背景图片
 
                 getStateManager().detach(this); // 移除当前状态
                 getStateManager().attach(new GameState(level)); // 切换到 GameState
