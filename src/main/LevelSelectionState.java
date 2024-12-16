@@ -20,7 +20,7 @@ public class LevelSelectionState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container levelSelectionForm;
-    private Picture welcome,select;
+    private Picture welcome,select,settings;
 
     @Override
     protected void initialize(Application app) {
@@ -50,12 +50,19 @@ public class LevelSelectionState extends BaseAppState {
         welcome.setLocalTranslation(15, app.getCamera().getHeight()-58 , 0);
         guiNode.attachChild(welcome);
 
-        Button settingButton = levelSelectionForm.addChild(new Button("Settings"));
+        /*Button settingButton = levelSelectionForm.addChild(new Button("Settings"));
         settingButton.setFontSize(45);
         settingButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new SettingState()); // 切换到 SettingState
-        });
+        });*/
+        levelSelectionForm.addChild(new Label("                   ")).setFontSize(45);
+        settings = new Picture("settings");
+        settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
+        settings.setWidth(350);
+        settings.setHeight(70);
+        settings.setLocalTranslation(12, app.getCamera().getHeight()-130 , 0);
+        guiNode.attachChild(settings);
 
         levelSelectionForm.addChild(new Label("                   ")).setFontSize(45);
         select = new Picture("select");
