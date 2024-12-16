@@ -3,9 +3,13 @@ package main;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.ui.Picture;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.style.BaseStyles;
 
@@ -17,6 +21,7 @@ public class SettingState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container container;
+    private Picture back,settings;
 
     @Override
     protected void initialize(Application app) {
@@ -38,24 +43,60 @@ public class SettingState extends BaseAppState {
     public static float getRotateSpeed() { return rotateSpeed; }
     public static int getSolverTimeLimit() { return solverTimeLimit; }
 
+    private void initInput() {
+        app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        app.getInputManager().addListener(actionListener, "Click");
+    }
+
+    private final ActionListener actionListener = new ActionListener() {
+        @Override
+        public void onAction(String name, boolean isPressed, float tpf) {
+            if (name.equals("Click") && isPressed) {
+                // 获取鼠标点击位置
+                float x = app.getInputManager().getCursorPosition().x;
+                float y = app.getInputManager().getCursorPosition().y;
+
+                // 检查点击位置是否在图片范围内
+                if (Main.inPicture(back, x, y)) {
+                    getStateManager().detach(SettingState.this); // 移除当前状态
+                    getStateManager().attach(new LevelSelectionState()); // 切换到登
+                }
+            }
+        }
+    };
+
     private void initGui() {
         container = new Container();
         guiNode.attachChild(container);
 
         // 添加标题
-        container.addChild(new Label("Settings")).setFontSize(30);
+        container.addChild(new Label("               ")).setFontSize(50);
+
+        settings = new Picture("settings");
+        settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
+        settings.setWidth(263);
+        settings.setHeight(70);
+        settings.setLocalTranslation(12, app.getCamera().getHeight()-80 , 0);
+        guiNode.attachChild(settings);
 
         // 添加设置表单
         Container settingForm = new Container();
         container.addChild(settingForm);
 
         // 添加返回按钮
-        Button backButton = container.addChild(new Button("Back"));
+        /*Button backButton = container.addChild(new Button("Back"));
         backButton.setFontSize(24);
         backButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new LevelSelectionState()); // 切换到 LevelSelectionState
-        });
+        });*/
+
+        back = new Picture("back");
+        back.setImage(app.getAssetManager(), "back1.png", true);
+        back.setWidth(100);
+        back.setHeight(100);
+        back.setLocalTranslation(12, app.getCamera().getHeight() - 300 , 0);
+        guiNode.attachChild(back);
 
         // 移动速度设置
         settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
@@ -119,6 +160,7 @@ public class SettingState extends BaseAppState {
     public void onEnable() {
         initGui(); // 初始化 GUI
         guiNode.attachChild(container); // 将菜单添加到 GUI 节点
+        initInput();
     }
 
     @Override
@@ -131,6 +173,8 @@ public class SettingState extends BaseAppState {
                 }
             }
         }
+        back.removeFromParent();
+        settings.removeFromParent();
         container.detachAllChildren(); // 移除所有子节点
         container.removeFromParent(); // 将菜单从 GUI 节点移除
     }
