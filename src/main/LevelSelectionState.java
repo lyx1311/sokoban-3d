@@ -3,6 +3,9 @@ package main;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
@@ -20,9 +23,8 @@ public class LevelSelectionState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Label usernameLabel;
-    private Button settingButton, backButton;
     private Container levelSelectionForm;
-    private Picture welcome,select,settings;
+    private Picture welcome,select,settings,back;
 
     @Override
     protected void initialize(Application app) {
@@ -40,6 +42,31 @@ public class LevelSelectionState extends BaseAppState {
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
     }
 
+    private void initInput() {
+        app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        app.getInputManager().addListener(actionListener, "Click");
+    }
+
+    private final ActionListener actionListener = new ActionListener() {
+        @Override
+        public void onAction(String name, boolean isPressed, float tpf) {
+            if (name.equals("Click") && isPressed) {
+                // 获取鼠标点击位置
+                float x = app.getInputManager().getCursorPosition().x;
+                float y = app.getInputManager().getCursorPosition().y;
+
+                // 检查点击位置是否在图片范围内
+                if (Main.inPicture(settings, x, y)) {
+                    getStateManager().detach(LevelSelectionState.this); // 移除当前状态
+                    getStateManager().attach(new SettingState()); // 切换到登
+                } else if (Main.inPicture(back, x, y)) {
+                    getStateManager().detach(LevelSelectionState.this);
+                    getStateManager().attach(new MainMenuState());
+                }
+            }
+        }
+    };
+
     private void initGui() {
         welcome = new Picture("welcome");
         welcome.setImage(app.getAssetManager(), "welcome.png", true);
@@ -53,14 +80,22 @@ public class LevelSelectionState extends BaseAppState {
         usernameLabel.setLocalTranslation(210, app.getCamera().getHeight() - 10, 0);
         guiNode.attachChild(usernameLabel);
 
-        settingButton = new Button("Settings");
+        /*settingButton = new Button("Settings");
         settingButton.setFontSize(45);
         settingButton.setLocalTranslation(10, app.getCamera().getHeight() - 60, 0);
         settingButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new SettingState()); // 切换到 SettingState
         });
-        guiNode.attachChild(settingButton);
+        guiNode.attachChild(settingButton);*/
+
+        //levelSelectionForm.addChild(new Label("                   ")).setFontSize(45);
+        settings = new Picture("settings");
+        settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
+        settings.setWidth(200);
+        settings.setHeight(70);
+        settings.setLocalTranslation(50, app.getCamera().getHeight()-130 , 0);
+        guiNode.attachChild(settings);
 
         select = new Picture("select");
         select.setImage(app.getAssetManager(), "select.png", true);
@@ -85,7 +120,7 @@ public class LevelSelectionState extends BaseAppState {
         }
         levelSelectionForm.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0); // 设置窗口位置
 
-        backButton = new Button("Log Out and Back");
+        /*backButton = new Button("Log Out and Back");
         backButton.setFontSize(24);
         backButton.setLocalTranslation(10, app.getCamera().getHeight() - 600, 0);
         backButton.addClickCommands(source -> {
@@ -94,13 +129,21 @@ public class LevelSelectionState extends BaseAppState {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new MainMenuState()); // 切换到 MainMenuState
         });
-        guiNode.attachChild(backButton);
+        guiNode.attachChild(backButton);*/
+
+        back = new Picture("back");
+        back.setImage(app.getAssetManager(), "back.png", true);
+        back.setWidth(250);
+        back.setHeight(100);
+        back.setLocalTranslation(50, app.getCamera().getHeight() - 700 , 0);
+        guiNode.attachChild(back);
     }
 
     @Override
     public void onEnable() {
         initGui(); // 初始化 GUI
         guiNode.attachChild(levelSelectionForm); // 将菜单添加到 GUI 节点
+        initInput();
     }
 
     @Override
@@ -110,13 +153,15 @@ public class LevelSelectionState extends BaseAppState {
         }
 
         usernameLabel.removeFromParent();
-        settingButton.removeFromParent();
-        backButton.removeFromParent();
+        settings.removeFromParent();
+        back.removeFromParent();
         levelSelectionForm.detachAllChildren(); // 移除所有子节点
         levelSelectionForm.removeFromParent(); // 将菜单从 GUI 节点移除
         app.getInputManager().clearMappings();
         welcome.removeFromParent();
         select.removeFromParent();
+        app.getInputManager().removeListener(actionListener);
+        app.getInputManager().clearMappings();
     }
 
     @Override
