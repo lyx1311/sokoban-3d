@@ -6,6 +6,7 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
 import com.jme3.scene.Node;
+import com.jme3.ui.Picture;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
@@ -17,7 +18,7 @@ public class HelpState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private GameState gameState;
-    private Label labels[] = new Label[TOTAL_LABELS];
+    private Picture pictures[] = new Picture[TOTAL_LABELS];
     private RawInputListener inputInterceptor; // 用于监测鼠标输入
     private int currentLabel = 0;
 
@@ -39,23 +40,19 @@ public class HelpState extends BaseAppState {
     }
 
     private void initHelp() {
-        labels[0] = new Label("Push all the boxes onto the glowing yellow target spots to win!");
-        labels[1] = new Label("Movement: Use WASD to move, QE to rotate the camera, and Space to push boxes. " +
-                "You can also click the corresponding buttons on the interface.");
-        labels[2] = new Label("Restart: Press R to restart the current level.");
-        labels[3] = new Label("Undo: Press U to undo the last move.");
-        labels[4] = new Label("For more actions, press ESC or click the top-left corner to open the menu.");
-
-        for (Label label : labels) {
-            label.setFontSize(40);
-            label.setLocalTranslation(100, app.getCamera().getHeight() - 100, 0);
+        for (int i = 0; i < TOTAL_LABELS; i++) {
+            pictures[i] = new Picture("help" + (i + 1));
+            pictures[i].setImage(app.getAssetManager(), "help" + (i + 1) + ".png", true);
+            pictures[i].setWidth(1199);
+            pictures[i].setHeight(1079);
+            pictures[i].setLocalTranslation(220, app.getCamera().getHeight() - 950, 0);
         }
     }
 
     @Override
     protected void onEnable() {
         initHelp();
-        guiNode.attachChild(labels[currentLabel]);
+        guiNode.attachChild(pictures[currentLabel]);
 
         // 激活输入监听
         InputManager inputManager = app.getInputManager();
@@ -64,10 +61,10 @@ public class HelpState extends BaseAppState {
                 @Override
                 public void onMouseButtonEvent(com.jme3.input.event.MouseButtonEvent evt) {
                     if (evt.isPressed()) {
-                        labels[currentLabel].removeFromParent();
+                        pictures[currentLabel].removeFromParent();
                         if (currentLabel < TOTAL_LABELS - 1) {
                             currentLabel++;
-                            guiNode.attachChild(labels[currentLabel]);
+                            guiNode.attachChild(pictures[currentLabel]);
                         } else {
                             getStateManager().detach(HelpState.this);
                         }
@@ -101,7 +98,7 @@ public class HelpState extends BaseAppState {
 
     @Override
     protected void onDisable() {
-        if (currentLabel < TOTAL_LABELS) labels[currentLabel].removeFromParent();
+        if (currentLabel < TOTAL_LABELS) pictures[currentLabel].removeFromParent();
         app.getInputManager().removeRawInputListener(inputInterceptor); // 移除输入监听
         gameState.closeHelp();
     }
