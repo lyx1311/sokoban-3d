@@ -128,6 +128,7 @@ public class LoginState extends BaseAppState {
             }
         }
     };
+
     // 验证用户凭证
     private boolean authenticateUser(String username, String password) {
         File file = new File(USER_LIST_FILE);
