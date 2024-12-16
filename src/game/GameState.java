@@ -178,12 +178,30 @@ public class GameState extends BaseAppState {
         public void onAction(String name, boolean isPressed, float tpf) {
             if (isHelping) return;
 
-            if (isPressed) {
-                if (name.equals("Click")) {
-                    float x = app.getInputManager().getCursorPosition().x;
-                    float y = app.getInputManager().getCursorPosition().y;
-                    if (Main.inPicture(menu, x, y) && !isMenuOpen) openMenu();
+            if (name.equals("Click")) {
+                float x = app.getInputManager().getCursorPosition().x;
+                float y = app.getInputManager().getCursorPosition().y;
+                if (Main.inPicture(menu, x, y)) {
+                    if (!isMenuOpen && isPressed) openMenu();
+                } else if (Main.inPicture(fd, x, y)) {
+                    onAction("MoveForward", isPressed, tpf);
+                } else if (Main.inPicture(bk, x, y)) {
+                    onAction("MoveBackward", isPressed, tpf);
+                } else if (Main.inPicture(l, x, y)) {
+                    onAction("MoveLeft", isPressed, tpf);
+                } else if (Main.inPicture(r, x, y)) {
+                    onAction("MoveRight", isPressed, tpf);
+                } else if (Main.inPicture(space, x, y)) {
+                    onAction("PushBox", isPressed, tpf);
+                } else if (Main.inPicture(Q, x, y)) {
+                    onAction("RotateLeft", isPressed, tpf);
+                } else if (Main.inPicture(E, x, y)) {
+                    onAction("RotateRight", isPressed, tpf);
                 }
+                return;
+            }
+
+            if (isPressed) {
                 if (name.equals("OpenMenu")) {
                     if (isMenuOpen) {
                         closeMenu();
