@@ -8,14 +8,13 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
-import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.PasswordField;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.style.BaseStyles;
 import java.io.File;
 import java.io.FileWriter;
@@ -48,14 +47,14 @@ public class RegisterState extends BaseAppState {
         }
         guiNode = ((SimpleApplication) app).getGuiNode();
         inputManager = app.getInputManager();
+    }
 
+    private void initGui() {
         // 初始化 Lemur GUI
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-    }
 
-    private void initGui() {
         registerForm = new Container();
         guiNode.attachChild(registerForm);
 
@@ -91,6 +90,7 @@ public class RegisterState extends BaseAppState {
         // 设置窗口位置
         registerForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
     }
+
     private void initInput() {
         app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         app.getInputManager().addListener(actionListener, "Click");
@@ -99,7 +99,7 @@ public class RegisterState extends BaseAppState {
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
-            if (name.equals("Click") && !isPressed) {
+            if (name.equals("Click") && isPressed) {
                 // 获取鼠标点击位置
                 float x = app.getInputManager().getCursorPosition().x;
                 float y = app.getInputManager().getCursorPosition().y;
@@ -162,10 +162,12 @@ public class RegisterState extends BaseAppState {
                             e.printStackTrace();
                         }
                     }
+
+                    onDisable();
+                    onEnable();
                 } else if (Main.inPicture(backPicture, x, y)) {
                     getStateManager().detach(RegisterState.this);
                     getStateManager().attach(new MainMenuState()); // 返回主菜单
-                    cleanup(); // 清理资源}
                 }
             }
         }
@@ -249,6 +251,10 @@ public class RegisterState extends BaseAppState {
 
     @Override
     public void onDisable() {
+        ((GuiControl) usernameField.getControl(GuiControl.class)).focusLost();
+        ((GuiControl) passwordField.getControl(GuiControl.class)).focusLost();
+        ((GuiControl) confirmPasswordField.getControl(GuiControl.class)).focusLost();
+
         registerForm.detachAllChildren(); // 移除表单的所有子节点
         registerForm.removeFromParent(); // 将表单从 GUI 节点移除
         registerPicture.removeFromParent();

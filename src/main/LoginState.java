@@ -16,6 +16,7 @@ import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.PasswordField;
 import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.style.BaseStyles;
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +81,7 @@ public class LoginState extends BaseAppState {
         // 设置窗口位置
         loginForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
     }
-    // 初始化输入
+
     private void initInput() {
         app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         app.getInputManager().addListener(actionListener, "Click");
@@ -89,7 +90,7 @@ public class LoginState extends BaseAppState {
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
-            if (name.equals("Click") && !isPressed) {
+            if (name.equals("Click") && isPressed) {
                 // 获取鼠标点击位置
                 float x = app.getInputManager().getCursorPosition().x;
                 float y = app.getInputManager().getCursorPosition().y;
@@ -123,7 +124,6 @@ public class LoginState extends BaseAppState {
                 } else if (Main.inPicture(backPicture, x, y)) {
                     getStateManager().detach(LoginState.this); // 移除当前状态
                     getStateManager().attach(new MainMenuState()); // 返回主菜单
-                    cleanup(); // 清理资源
                 }
             }
         }
@@ -168,7 +168,8 @@ public class LoginState extends BaseAppState {
 
     @Override
     public void onDisable() {
-        for (Spatial child : loginForm.getChildren()) child.removeFromParent();
+        ((GuiControl) usernameField.getControl(GuiControl.class)).focusLost();
+        ((GuiControl) passwordField.getControl(GuiControl.class)).focusLost();
 
         loginForm.detachAllChildren(); // 移除表单的所有子节点
         loginForm.removeFromParent(); // 将表单从 GUI 节点移除

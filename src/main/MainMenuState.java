@@ -57,17 +57,16 @@ public class MainMenuState extends BaseAppState {
         guiNode.attachChild(visitorPicture);
     }
 
-    // 初始化输入
     private void initInput() {
-        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(actionListener, "Click");
+        app.getInputManager().addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        app.getInputManager().addListener(actionListener, "Click");
     }
 
     // 鼠标点击事件监听器
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
-            if (name.equals("Click") && !isPressed) {
+            if (name.equals("Click") && isPressed) {
                 // 获取鼠标点击位置
                 float x = inputManager.getCursorPosition().x;
                 float y = inputManager.getCursorPosition().y;
