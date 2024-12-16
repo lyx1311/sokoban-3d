@@ -25,6 +25,8 @@ public class Main extends SimpleApplication {
         settings.setResolution(1600, 900); // 设置分辨率为屏幕分辨率
         settings.setResizable(true); // 缩放窗口
         settings.setTitle("SOKOBAN!"); // 设置窗口标题
+        // 设置窗口图标
+        //settings.setIcons(new Picture[]{new Picture("images/boxicon.png")});
 
         // 启动程序
         app.setSettings(settings);

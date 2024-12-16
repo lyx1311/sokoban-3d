@@ -5,6 +5,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.ui.Picture;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -19,6 +20,7 @@ public class LevelSelectionState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container levelSelectionForm;
+    private Picture welcome,select;
 
     @Override
     protected void initialize(Application app) {
@@ -40,16 +42,28 @@ public class LevelSelectionState extends BaseAppState {
         levelSelectionForm = new Container();
         guiNode.attachChild(levelSelectionForm);
 
-        levelSelectionForm.addChild(new Label("Hello, " + Main.username + "!")).setFontSize(24);
+        levelSelectionForm.addChild(new Label("                    " + Main.username + " ")).setFontSize(45);
+        welcome = new Picture("welcome");
+        welcome.setImage(app.getAssetManager(), "welcome.png", true);
+        welcome.setWidth(200);
+        welcome.setHeight(36);
+        welcome.setLocalTranslation(15, app.getCamera().getHeight()-58 , 0);
+        guiNode.attachChild(welcome);
 
         Button settingButton = levelSelectionForm.addChild(new Button("Settings"));
-        settingButton.setFontSize(24);
+        settingButton.setFontSize(45);
         settingButton.addClickCommands(source -> {
             getStateManager().detach(this); // 移除当前状态
             getStateManager().attach(new SettingState()); // 切换到 SettingState
         });
 
-        levelSelectionForm.addChild(new Label("Select a level:")).setFontSize(24);
+        levelSelectionForm.addChild(new Label("                   ")).setFontSize(45);
+        select = new Picture("select");
+        select.setImage(app.getAssetManager(), "select.png", true);
+        select.setWidth(350);
+        select.setHeight(44);
+        select.setLocalTranslation(12, app.getCamera().getHeight()-185 , 0);
+        guiNode.attachChild(select);
 
         for (int i = 1; i <= LEVEL_COUNT; i++) {
             Button levelButton = levelSelectionForm.addChild(new Button("Level " + i));
@@ -89,6 +103,9 @@ public class LevelSelectionState extends BaseAppState {
         }
         levelSelectionForm.detachAllChildren(); // 移除所有子节点
         levelSelectionForm.removeFromParent(); // 将菜单从 GUI 节点移除
+        app.getInputManager().clearMappings();
+        welcome.removeFromParent();
+        select.removeFromParent();
     }
 
     @Override
