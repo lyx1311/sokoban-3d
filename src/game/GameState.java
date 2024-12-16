@@ -24,7 +24,7 @@ public class GameState extends BaseAppState {
     private InputManager inputManager;
     private CubeState cubeState;
     private MenuState menuState;
-    private boolean isMenuOpen = false, isSolving = false, isSolverWorking = false;
+    private boolean isMenuOpen = false, isHelping = false, isSolving = false, isSolverWorking = false;
     private Queue<String> instructions = new LinkedList<>();
     private Queue<Character> solution = new LinkedList<>();
     private Picture menu;
@@ -76,6 +76,13 @@ public class GameState extends BaseAppState {
         isMenuOpen = false;
     }
 
+    public void openHelp() {
+        HelpState helpState = new HelpState(this);
+        getStateManager().attach(helpState);
+        isHelping = true;
+    }
+    public void closeHelp() { isHelping = false; }
+
     public void startSolving() {
         isSolverWorking = true;
         if (cubeState.isFlying()) cubeState.reverseFly();
@@ -112,22 +119,21 @@ public class GameState extends BaseAppState {
         inputManager.addMapping("Undo", new KeyTrigger(KeyInput.KEY_U));
         inputManager.addMapping("Fly", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addMapping("OpenMenu", new KeyTrigger(KeyInput.KEY_ESCAPE));
-        inputManager.addMapping("Click",new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(actionListener, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight",
                 "PushBox", "RotateLeft", "RotateRight", "Undo", "Fly", "OpenMenu","Click");
     }
 
-
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
+            if (isHelping) return;
+
             if (isPressed) {
-                if (name.equals("Click")){
+                if (name.equals("Click")) {
                     float x = app.getInputManager().getCursorPosition().x;
                     float y = app.getInputManager().getCursorPosition().y;
-                    if (Main.inPicture(menu,x,y) && !isMenuOpen){
-                        openMenu();
-                    }
+                    if (Main.inPicture(menu, x, y) && !isMenuOpen) openMenu();
                 }
                 if (name.equals("OpenMenu")) {
                     if (isMenuOpen) {

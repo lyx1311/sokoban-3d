@@ -62,7 +62,7 @@ public class MenuState extends BaseAppState {
             if (checkWorking()) return;
 
             gameState.closeMenu();
-            getStateManager().attach(new HelpState());
+            gameState.openHelp();
         });
 
         if (!cubeState.isWin()) {

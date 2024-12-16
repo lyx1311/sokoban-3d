@@ -12,10 +12,16 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class HelpState extends BaseAppState {
+    private static final int TOTAL_LABELS = 5;
+
     private Application app;
     private Node guiNode;
-    private Container helpForm;
+    private GameState gameState;
+    private Label labels[] = new Label[TOTAL_LABELS];
     private RawInputListener inputInterceptor; // 用于监测鼠标输入
+    private int currentLabel = 0;
+
+    public HelpState(GameState gameState) { this.gameState = gameState; }
 
     @Override
     protected void initialize(Application app) {
@@ -33,38 +39,23 @@ public class HelpState extends BaseAppState {
     }
 
     private void initHelp() {
-        helpForm = new Container();
-        guiNode.attachChild(helpForm);
-
-        Label label1 = new Label("Push all the boxes onto the glowing yellow target spots to win!");
-        label1.setFontSize(40);
-        helpForm.addChild(label1);
-
-        Label label2 = new Label("Movement: Use WASD to move, QE to rotate the camera, and Space to push boxes. " +
+        labels[0] = new Label("Push all the boxes onto the glowing yellow target spots to win!");
+        labels[1] = new Label("Movement: Use WASD to move, QE to rotate the camera, and Space to push boxes. " +
                 "You can also click the corresponding buttons on the interface.");
-        label2.setFontSize(40);
-        helpForm.addChild(label2);
+        labels[2] = new Label("Restart: Press R to restart the current level.");
+        labels[3] = new Label("Undo: Press U to undo the last move.");
+        labels[4] = new Label("For more actions, press ESC or click the top-left corner to open the menu.");
 
-        Label label3 = new Label("Flying: Press L to toggle flying mode." +
-                " While flying, use WASDQE to move and rotate the camera, and Space to ascend.");
-        label3.setFontSize(40);
-        helpForm.addChild(label3);
-
-        Label label4 = new Label("Undo: Press U to undo the last move.");
-        label4.setFontSize(40);
-        helpForm.addChild(label4);
-
-        Label label5 = new Label("For more actions, press ESC or click the top-left corner to open the menu.");
-        label5.setFontSize(40);
-        helpForm.addChild(label5);
-
-        // 设置位置
-        helpForm.setLocalTranslation(100, app.getCamera().getHeight() - 100, 0);
+        for (Label label : labels) {
+            label.setFontSize(40);
+            label.setLocalTranslation(100, app.getCamera().getHeight() - 100, 0);
+        }
     }
 
     @Override
     protected void onEnable() {
         initHelp();
+        guiNode.attachChild(labels[currentLabel]);
 
         // 激活输入监听
         InputManager inputManager = app.getInputManager();
@@ -72,7 +63,15 @@ public class HelpState extends BaseAppState {
             inputInterceptor = new RawInputListener() {
                 @Override
                 public void onMouseButtonEvent(com.jme3.input.event.MouseButtonEvent evt) {
-                    if (evt.isPressed()) onDisable(); // 点击任意位置关闭弹框
+                    if (evt.isPressed()) {
+                        labels[currentLabel].removeFromParent();
+                        if (currentLabel < TOTAL_LABELS - 1) {
+                            currentLabel++;
+                            guiNode.attachChild(labels[currentLabel]);
+                        } else {
+                            getStateManager().detach(HelpState.this);
+                        }
+                    }
                 }
 
                 @Override
@@ -102,9 +101,9 @@ public class HelpState extends BaseAppState {
 
     @Override
     protected void onDisable() {
-        helpForm.detachAllChildren();
-        helpForm.removeFromParent();
+        if (currentLabel < TOTAL_LABELS) labels[currentLabel].removeFromParent();
         app.getInputManager().removeRawInputListener(inputInterceptor); // 移除输入监听
+        gameState.closeHelp();
     }
 
     @Override
