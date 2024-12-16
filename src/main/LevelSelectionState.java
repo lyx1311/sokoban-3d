@@ -77,7 +77,7 @@ public class LevelSelectionState extends BaseAppState {
 
         usernameLabel = new Label(Main.username);
         usernameLabel.setFontSize(45);
-        usernameLabel.setLocalTranslation(210, app.getCamera().getHeight() - 10, 0);
+        usernameLabel.setLocalTranslation(230, app.getCamera().getHeight() - 10, 0);
         guiNode.attachChild(usernameLabel);
 
         /*settingButton = new Button("Settings");
@@ -89,12 +89,11 @@ public class LevelSelectionState extends BaseAppState {
         });
         guiNode.attachChild(settingButton);*/
 
-        //levelSelectionForm.addChild(new Label("                   ")).setFontSize(45);
         settings = new Picture("settings");
         settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
-        settings.setWidth(263);
-        settings.setHeight(70);
-        settings.setLocalTranslation(50, app.getCamera().getHeight()-130 , 0);
+        settings.setWidth(357);
+        settings.setHeight(95);
+        settings.setLocalTranslation(55, app.getCamera().getHeight()-675 , 0);
         guiNode.attachChild(settings);
 
         select = new Picture("select");
@@ -133,9 +132,9 @@ public class LevelSelectionState extends BaseAppState {
 
         back = new Picture("back");
         back.setImage(app.getAssetManager(), "back.png", true);
-        back.setWidth(250);
+        back.setWidth(668);
         back.setHeight(100);
-        back.setLocalTranslation(55, app.getCamera().getHeight() - 650 , 0);
+        back.setLocalTranslation(55, app.getCamera().getHeight() - 800 , 0);
         guiNode.attachChild(back);
     }
 

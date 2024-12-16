@@ -55,6 +55,16 @@ public class MenuState extends BaseAppState {
         stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
         stepsLabel.setFontSize(24);
 
+        Button helpButton = menu.addChild(new Button("Help"));
+        helpButton.setFontSize(24);
+        helpButton.addClickCommands(source -> {
+            if (checkSolverWorking()) return;
+            if (checkWorking()) return;
+
+            gameState.closeMenu();
+            getStateManager().attach(new HelpState());
+        });
+
         if (!cubeState.isWin()) {
             Button solveButton = menu.addChild(new Button(gameState.isSolving() ? "Stop AI" : "Solve by AI"));
             solveButton.setFontSize(24);

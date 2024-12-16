@@ -3,6 +3,8 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.input.InputManager;
+import com.jme3.input.RawInputListener;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -13,6 +15,7 @@ public class HelpState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container helpForm;
+    private RawInputListener inputInterceptor; // 用于监测鼠标输入
 
     @Override
     protected void initialize(Application app) {
@@ -42,7 +45,8 @@ public class HelpState extends BaseAppState {
         label2.setFontSize(40);
         helpForm.addChild(label2);
 
-        Label label3 = new Label("Restart: Press R to restart the current level.");
+        Label label3 = new Label("Flying: Press L to toggle flying mode." +
+                " While flying, use WASDQE to move and rotate the camera, and Space to ascend.");
         label3.setFontSize(40);
         helpForm.addChild(label3);
 
@@ -59,12 +63,48 @@ public class HelpState extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() { initHelp(); }
+    protected void onEnable() {
+        initHelp();
+
+        // 激活输入监听
+        InputManager inputManager = app.getInputManager();
+        if (inputInterceptor == null) {
+            inputInterceptor = new RawInputListener() {
+                @Override
+                public void onMouseButtonEvent(com.jme3.input.event.MouseButtonEvent evt) {
+                    if (evt.isPressed()) onDisable(); // 点击任意位置关闭弹框
+                }
+
+                @Override
+                public void beginInput() {}
+
+                @Override
+                public void endInput() {}
+
+                @Override
+                public void onMouseMotionEvent(com.jme3.input.event.MouseMotionEvent evt) {}
+
+                @Override
+                public void onKeyEvent(com.jme3.input.event.KeyInputEvent evt) {}
+
+                @Override
+                public void onTouchEvent(com.jme3.input.event.TouchEvent evt) {}
+
+                @Override
+                public void onJoyAxisEvent(com.jme3.input.event.JoyAxisEvent evt) {}
+
+                @Override
+                public void onJoyButtonEvent(com.jme3.input.event.JoyButtonEvent evt) {}
+            };
+        }
+        inputManager.addRawInputListener(inputInterceptor);
+    }
 
     @Override
     protected void onDisable() {
         helpForm.detachAllChildren();
         helpForm.removeFromParent();
+        app.getInputManager().removeRawInputListener(inputInterceptor); // 移除输入监听
     }
 
     @Override
