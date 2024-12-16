@@ -8,8 +8,15 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.scene.Node;
+import com.jme3.ui.Picture;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.style.BaseStyles;
+import main.Main;
 
 public class GameState extends BaseAppState {
     private Application app;
@@ -20,6 +27,8 @@ public class GameState extends BaseAppState {
     private boolean isMenuOpen = false, isSolving = false, isSolverWorking = false;
     private Queue<String> instructions = new LinkedList<>();
     private Queue<Character> solution = new LinkedList<>();
+    private Picture menu;
+    private Node guiNode;
 
     public GameState(int level) {
         this.level = level;
@@ -29,6 +38,26 @@ public class GameState extends BaseAppState {
     protected void initialize(Application app) {
         this.app = app;
         this.inputManager = app.getInputManager();
+        if (app instanceof SimpleApplication) {
+            guiNode = ((SimpleApplication) app).getGuiNode();
+        } else {
+            throw new IllegalArgumentException("Application is not an instance of SimpleApplication");
+        }
+
+        // 初始化 Lemur GUI
+        GuiGlobals.initialize(app);
+        BaseStyles.loadGlassStyle();
+        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+    }
+
+
+    private void initGui(){
+        menu = new Picture("menu");
+        menu.setImage(app.getAssetManager(), "menu.png", true);
+        menu.setWidth(100);
+        menu.setHeight(100);
+        menu.setLocalTranslation(15, app.getCamera().getHeight() - 100 , 0);
+        guiNode.attachChild(menu);
     }
 
     public boolean isSolving() { return isSolving; }
@@ -38,10 +67,12 @@ public class GameState extends BaseAppState {
     public void openMenu() {
         menuState = new MenuState(this, cubeState, level);
         getStateManager().attach(menuState);
+        menu.removeFromParent();
         isMenuOpen = true;
     }
     public void closeMenu() {
         getStateManager().detach(menuState);
+        initGui();
         isMenuOpen = false;
     }
 
@@ -81,14 +112,23 @@ public class GameState extends BaseAppState {
         inputManager.addMapping("Undo", new KeyTrigger(KeyInput.KEY_U));
         inputManager.addMapping("Fly", new KeyTrigger(KeyInput.KEY_L));
         inputManager.addMapping("OpenMenu", new KeyTrigger(KeyInput.KEY_ESCAPE));
+        inputManager.addMapping("Click",new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(actionListener, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight",
-                "PushBox", "RotateLeft", "RotateRight", "Undo", "Fly", "OpenMenu");
+                "PushBox", "RotateLeft", "RotateRight", "Undo", "Fly", "OpenMenu","Click");
     }
+
 
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
             if (isPressed) {
+                if (name.equals("Click")){
+                    float x = app.getInputManager().getCursorPosition().x;
+                    float y = app.getInputManager().getCursorPosition().y;
+                    if (Main.inPicture(menu,x,y) && !isMenuOpen){
+                        openMenu();
+                    }
+                }
                 if (name.equals("OpenMenu")) {
                     if (isMenuOpen) {
                         closeMenu();
@@ -133,11 +173,13 @@ public class GameState extends BaseAppState {
         }
     };
 
+
     @Override
     public void onEnable() {
         cubeState = new CubeState(level);
         getStateManager().attach(cubeState);
         initInput();
+        initGui();
     }
 
     @Override
@@ -189,6 +231,7 @@ public class GameState extends BaseAppState {
     public void onDisable() {
         getStateManager().detach(cubeState);
         inputManager.removeListener(actionListener);
+        menu.removeFromParent();
         inputManager.clearMappings();
     }
 
