@@ -591,7 +591,7 @@ public class CubeState extends BaseAppState {
         // 确保列表至少有 level 行，不足的用空行补齐
         while (lines.size() < level) lines.add("");
 
-        // 修改第k行
+        // 修改第 k 行
         lines.set(level - 1, steps);
 
         // 将修改后的内容写回文件
@@ -724,6 +724,8 @@ public class CubeState extends BaseAppState {
         rootNode.removeFromParent();
         app.getRootNode().removeLight(ambientLight);
         app.getRootNode().removeLight(sunLight);
+
+        if (Monkey.isAdded()) Monkey.remove();
 
         getStateManager().detach(filterState);
     }

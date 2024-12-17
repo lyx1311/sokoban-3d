@@ -7,22 +7,13 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.math.Quaternion;
 import com.jme3.scene.Spatial;
 
-/**
- * 动画
- *
- * @author yanmaoyuan
- *
- */
 public abstract class Monkey {
-    /**
-     * 动画模型
-     */
     private static Spatial spatial;
-
     private static AnimControl animControl;
     private static AnimChannel animChannel;
-    public static void add(Application app, float x, float y, float z, Quaternion rotation) {
+    private static boolean isAdded = false;
 
+    public static void add(Application app, float x, float y, float z, Quaternion rotation) {
         // 加载Jaime模型
         spatial = app.getAssetManager().loadModel("Models/Jaime/Jaime.j3o");
         spatial.setLocalScale(15f);;
@@ -39,9 +30,14 @@ public abstract class Monkey {
         } else {
             throw new IllegalArgumentException("Application is not an instance of SimpleApplication");
         }
+
+        isAdded = true;
     }
 
     public static void remove() {
         spatial.removeFromParent();
+        isAdded = false;
     }
+
+    public static boolean isAdded() { return isAdded; }
 }
