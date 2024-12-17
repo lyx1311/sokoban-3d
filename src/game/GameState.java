@@ -50,14 +50,17 @@ public class GameState extends BaseAppState {
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
     }
 
-
-    private void initGui(){
+    private void initMenu() {
         menu = new Picture("menu");
         menu.setImage(app.getAssetManager(), "menu.png", true);
         menu.setWidth(100);
         menu.setHeight(100);
-        menu.setLocalTranslation(15, app.getCamera().getHeight() - 100 , 0);
+        menu.setLocalTranslation(15, app.getCamera().getHeight() - 100, 0);
         guiNode.attachChild(menu);
+    }
+
+    private void initGui() {
+        initMenu();
 
         fd = new Picture("fd");
         fd.setImage(app.getAssetManager(), "fd.png", true);
@@ -121,7 +124,7 @@ public class GameState extends BaseAppState {
     }
     public void closeMenu() {
         getStateManager().detach(menuState);
-        initGui();
+        initMenu();
         isMenuOpen = false;
     }
 
@@ -303,7 +306,6 @@ public class GameState extends BaseAppState {
     @Override
     public void onDisable() {
         getStateManager().detach(cubeState);
-        inputManager.removeListener(actionListener);
         menu.removeFromParent();
         fd.removeFromParent();
         bk.removeFromParent();
@@ -312,6 +314,7 @@ public class GameState extends BaseAppState {
         Q.removeFromParent();
         E.removeFromParent();
         space.removeFromParent();
+        inputManager.removeListener(actionListener);
         inputManager.clearMappings();
     }
 
