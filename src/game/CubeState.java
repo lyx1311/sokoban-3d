@@ -532,7 +532,7 @@ public class CubeState extends BaseAppState {
                 Monkey.remove();
             }
         } else {
-            cameraControl.startFly();
+            cameraControl.startFly(2 * (heroX + 1) * SIDE, -2 * (heroY + 1) * SIDE);
             filterState.remove(ssao);
             Monkey.add(app, 2 * (heroX + 1) * SIDE, 0, -2 * (heroY + 1) * SIDE, app.getCamera().getRotation());
         }
