@@ -79,8 +79,6 @@ public class MenuState extends BaseAppState {
                     return;
                 }
 
-                gameState.closeMenu();
-
                 if (gameState.isSolving()) {
                     gameState.stopSolving();
                 } else {
@@ -92,6 +90,8 @@ public class MenuState extends BaseAppState {
                             "Please wait for a moment."
                     ));
                 }
+
+                gameState.closeMenu();
             });
         }
 

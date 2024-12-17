@@ -27,7 +27,7 @@ public class GameState extends BaseAppState {
     private boolean isMenuOpen = false, isHelping = false, isSolving = false, isSolverWorking = false;
     private Queue<String> instructions = new LinkedList<>();
     private Queue<Character> solution = new LinkedList<>();
-    private Picture menu,fd,bk,l,r,Q,E,space;
+    private Picture menu, fd, bk, l, r, Q, E, space;
     private Node guiNode;
 
     public GameState(int level) {
@@ -305,6 +305,13 @@ public class GameState extends BaseAppState {
         getStateManager().detach(cubeState);
         inputManager.removeListener(actionListener);
         menu.removeFromParent();
+        fd.removeFromParent();
+        bk.removeFromParent();
+        l.removeFromParent();
+        r.removeFromParent();
+        Q.removeFromParent();
+        E.removeFromParent();
+        space.removeFromParent();
         inputManager.clearMappings();
     }
 
