@@ -123,8 +123,8 @@ public class MenuState extends BaseAppState {
                 }
             }
         }
-
     };
+
     private void initGui() {
         menu = new Container();
 
@@ -141,21 +141,18 @@ public class MenuState extends BaseAppState {
         help.setLocalTranslation(10, app.getCamera().getHeight() - 150, 0);
         guiNode.attachChild(help);
 
-        if (!cubeState.isWin() && !gameState.isSolving()) {
-            solve = new Picture("solve");
-            solve.setImage(app.getAssetManager(), "menusolve.png", true);
-            solve.setWidth(257);
-            solve.setHeight(50);
-            solve.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0);
-            guiNode.attachChild(solve);
-        }else if(!cubeState.isWin() && gameState.isSolving()) {
+        if (gameState.isSolving()) {
             solve = new Picture("stop");
             solve.setImage(app.getAssetManager(), "menustop.png", true);
             solve.setWidth(183);
-            solve.setHeight(50);
-            solve.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0);
-            guiNode.attachChild(solve);
+        } else {
+            solve = new Picture("solve");
+            solve.setImage(app.getAssetManager(), "menusolve.png", true);
+            solve.setWidth(257);
         }
+        solve.setHeight(50);
+        solve.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0);
+        guiNode.attachChild(solve);
 
         restart = new Picture("restart");
         restart.setImage(app.getAssetManager(), "menurestart.png", true);
@@ -192,7 +189,7 @@ public class MenuState extends BaseAppState {
             close.setHeight(50);
             close.setLocalTranslation(10, app.getCamera().getHeight() - 450, 0);
             guiNode.attachChild(close);
-        }else {
+        } else {
             back = new Picture("back");
             back.setImage(app.getAssetManager(), "menuback.png", true);
             back.setWidth(135);

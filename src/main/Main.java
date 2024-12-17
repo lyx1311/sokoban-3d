@@ -23,7 +23,7 @@ public class Main extends SimpleApplication {
         AppSettings settings = new AppSettings(true);
         settings.setFullscreen(false); // 设置为窗口模式
         settings.setResolution(1600, 900); // 设置分辨率为屏幕分辨率
-        settings.setResizable(true); // 缩放窗口
+        settings.setResizable(false); // 缩放窗口
         settings.setTitle("SOKOBAN!"); // 设置窗口标题
         // 设置窗口图标
         //settings.setIcons(new Picture[]{new Picture("images/boxicon.png")});
@@ -89,7 +89,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
         if (cubeGeo != null) {
-            // 旋转速度：每秒360°
+            // 旋转速度：每秒 90°
             float speed = FastMath.HALF_PI;
             // 让方块匀速旋转
             cubeGeo.rotate(0, tpf * speed, 0);

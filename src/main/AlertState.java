@@ -15,12 +15,16 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
+import org.lwjgl.Sys;
 
 public class AlertState extends BaseAppState {
     private static final float startHeight = 200; // 弹框相对于屏幕中央的初始高度
     private static final float endHeight = 300; // 弹框相对于屏幕中央的最终高度
     private static final float stopMovingTime = 0.8f; // 弹框从初始高度到最终高度的时间（秒）
     private static final float maxTime = 3.0f; // 自动关闭的时间（秒）
+    private static final float interval = 60; // 弹框之间的间隔
+
+    private static boolean locationUsed[] = new boolean[1000]; // 用于记录弹框位置是否被占用
 
     private Application app;
     private String title;
@@ -29,12 +33,16 @@ public class AlertState extends BaseAppState {
     private Node guiNode;
     private Geometry background; // 全屏背景遮挡层
     private RawInputListener inputInterceptor; // 用于监测鼠标输入
-
+    private int location = 0; // 弹框是第几个
     private float timer = 0;  // 用于计时
 
     public AlertState(String title, String message) {
         this.title = title;
         this.message = message;
+
+        // 寻找第一个未被占用的位置
+        while (locationUsed[location]) location++;
+        locationUsed[location] = true;
     }
 
     @Override
@@ -94,8 +102,8 @@ public class AlertState extends BaseAppState {
 
         // 设置弹框位置
         alertBox.setLocalTranslation(
-                app.getCamera().getWidth() / 2f - 150,
-                app.getCamera().getHeight() / 2f + startHeight,
+                app.getCamera().getWidth() / 2f - 200,
+                app.getCamera().getHeight() / 2f + startHeight - location * interval,
                 1
         );
     }
@@ -147,7 +155,7 @@ public class AlertState extends BaseAppState {
             onDisable(); // 超过最大时间后关闭
         } else if (timer <= stopMovingTime) {
             // 计算弹框的高度
-            float height = startHeight + (endHeight - startHeight) * Math.min(timer / stopMovingTime, 1);
+            float height = startHeight - location * interval + (endHeight - startHeight) * Math.min(timer / stopMovingTime, 1);
 
             // 设置弹框位置
             alertBox.setLocalTranslation(
@@ -158,7 +166,7 @@ public class AlertState extends BaseAppState {
         } else {
             alertBox.setLocalTranslation(
                     app.getCamera().getWidth() / 2f - 150,
-                    app.getCamera().getHeight() / 2f + endHeight,
+                    app.getCamera().getHeight() / 2f + endHeight - location * interval,
                     1
             );
         }
@@ -168,6 +176,7 @@ public class AlertState extends BaseAppState {
     protected void onDisable() {
         background.removeFromParent(); // 移除全屏背景
         alertBox.removeFromParent(); // 移除弹框
+        locationUsed[location] = false; // 释放位置
         app.getInputManager().removeRawInputListener(inputInterceptor); // 移除输入监听
     }
 
