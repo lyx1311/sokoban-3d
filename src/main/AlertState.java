@@ -15,7 +15,6 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
-import org.lwjgl.Sys;
 
 public class AlertState extends BaseAppState {
     private static final float startHeight = 200; // 弹框相对于屏幕中央的初始高度
@@ -158,6 +157,7 @@ public class AlertState extends BaseAppState {
 
         if (timer >= maxTime) {
             onDisable(); // 超过最大时间后关闭
+            cleanup(); // 清理资源
         } else if (timer <= stopMovingTime) {
             // 计算弹框的高度
             float height = startHeight - location * interval + (endHeight - startHeight) * Math.min(timer / stopMovingTime, 1);
@@ -181,10 +181,11 @@ public class AlertState extends BaseAppState {
     protected void onDisable() {
         background.removeFromParent(); // 移除全屏背景
         alertBox.removeFromParent(); // 移除弹框
-        locationUsed[location] = false; // 释放位置
         app.getInputManager().removeRawInputListener(inputInterceptor); // 移除输入监听
     }
 
     @Override
-    protected void cleanup(Application app) {}
+    protected void cleanup(Application app) {
+        locationUsed[location] = false; // 释放位置
+    }
 }
