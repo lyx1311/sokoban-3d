@@ -6,6 +6,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -22,6 +23,8 @@ public class SettingState extends BaseAppState {
     private Node guiNode;
     private Container container;
     private Picture back,settings;
+    private Label moveSpeedLabel, rotateSpeedLabel, solverTimeLimitLabel;
+    private Button apply;
 
     @Override
     protected void initialize(Application app) {
@@ -99,8 +102,10 @@ public class SettingState extends BaseAppState {
         guiNode.attachChild(back);
 
         // 移动速度设置
-        settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
-                " seconds per move")).setFontSize(24);
+       moveSpeedLabel=settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
+               " seconds per move"));
+       moveSpeedLabel.setFontSize(40);
+       moveSpeedLabel.setColor(ColorRGBA.White);
         Slider moveSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.1f, 1.5f,
                 moveSpeed)), 1);
         setStyle(moveSpeedSlider, 0.1f);
@@ -112,8 +117,10 @@ public class SettingState extends BaseAppState {
         });
 
         // 旋转速度设置
-        settingForm.addChild(new Label("Rotate Speed: " + String.format("%.2f", rotateSpeed) +
-                " seconds per rotation")).setFontSize(24);
+        rotateSpeedLabel=settingForm.addChild(new Label("Rotate Speed: " + String.format("%.2f", rotateSpeed) +
+                " seconds per rotation"));
+        rotateSpeedLabel.setFontSize(40);
+        rotateSpeedLabel.setColor(ColorRGBA.White);
         Slider rotateSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.1f, 3.0f,
                 rotateSpeed)), 1);
         setStyle(rotateSpeedSlider, 0.1f);
@@ -125,8 +132,10 @@ public class SettingState extends BaseAppState {
         });
 
         // 求解器时间限制设置
-        settingForm.addChild(new Label("Solver Time Limit: " + String.format("%d", solverTimeLimit) +
-                " seconds")).setFontSize(24);
+        solverTimeLimitLabel=settingForm.addChild(new Label("Solver Time Limit: " + String.format("%d", solverTimeLimit) +
+                " seconds"));
+        solverTimeLimitLabel.setFontSize(40);
+        solverTimeLimitLabel.setColor(ColorRGBA.White);
         Slider solverTimeLimitSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(1.0f, 30.0f,
                 solverTimeLimit)), 1);
         setStyle(solverTimeLimitSlider, 1.0f);
@@ -151,9 +160,10 @@ public class SettingState extends BaseAppState {
     }
 
     private Button addButton(Container container) {
-        Button button = container.addChild(new Button("Apply"), 2);
-        button.setFontSize(24);
-        return button;
+        apply=container.addChild(new Button("Apply"), 2);
+        apply.setColor(ColorRGBA.White);
+        apply.setFontSize(24);
+        return apply;
     }
 
     @Override
