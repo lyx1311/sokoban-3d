@@ -13,11 +13,10 @@ import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.ui.Picture;
 
-import javax.swing.*;
 
 public class Main extends SimpleApplication {
     public static String username = "";
-    public Icon icon = new ImageIcon("menuicon.png");
+    //public Icon icon = new ImageIcon("menuicon.ico");
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -27,9 +26,7 @@ public class Main extends SimpleApplication {
         settings.setFullscreen(false); // 设置为窗口模式
         settings.setResolution(1600, 900); // 设置分辨率为屏幕分辨率
         settings.setResizable(false); // 缩放窗口
-        settings.setTitle("SOKOBAN!"); // 设置窗口标题
-        // 设置窗口图标
-        //settings.setIcons(new java.awt.Image[]{((ImageIcon) app.icon).getImage()});
+        settings.setTitle("Sokoban Monkey"); // 设置窗口标题
 
         // 启动程序
         app.setSettings(settings);
