@@ -7,6 +7,7 @@ import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
 import com.simsilica.lemur.Container;
@@ -37,6 +38,7 @@ public class RegisterState extends BaseAppState {
     private TextField usernameField;
     private PasswordField passwordField, confirmPasswordField;
     private Picture registerPicture, backPicture;
+    private Label usernameLabel, passwordLabel, confirmPasswordLabel;
 
     @Override
     protected void initialize(Application app) {
@@ -58,17 +60,24 @@ public class RegisterState extends BaseAppState {
         registerForm = new Container();
         guiNode.attachChild(registerForm);
 
-        registerForm.addChild(new Label("Username:")).setFontSize(40);
+
+        usernameLabel=registerForm.addChild(new Label("Username:"));
+        usernameLabel.setFontSize(40);
+        usernameLabel.setColor(ColorRGBA.White);
         usernameField = registerForm.addChild(new TextField(username), 1);
         usernameField.setPreferredWidth(200);
         usernameField.setFontSize(40);
 
-        registerForm.addChild(new Label("Password:")).setFontSize(40);
+        passwordLabel=registerForm.addChild(new Label("Password:"));
+        passwordLabel.setFontSize(40);
+        passwordLabel.setColor(ColorRGBA.White);
         passwordField = registerForm.addChild(new PasswordField(password), 1);
         passwordField.setPreferredWidth(200);
         passwordField.setFontSize(40);
 
-        registerForm.addChild(new Label("Confirm Password:")).setFontSize(40);
+        confirmPasswordLabel=registerForm.addChild(new Label("Confirm Password:"));
+        confirmPasswordLabel.setFontSize(40);
+        confirmPasswordLabel.setColor(ColorRGBA.White);
         confirmPasswordField = registerForm.addChild(new PasswordField(confirmPassword), 1);
         confirmPasswordField.setPreferredWidth(200);
         confirmPasswordField.setFontSize(40);

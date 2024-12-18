@@ -7,6 +7,7 @@ import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
@@ -33,6 +34,7 @@ public class LoginState extends BaseAppState {
     private TextField usernameField;
     private PasswordField passwordField;
     private Picture logInPicture, backPicture;
+    private Label usernameLabel,passwordLabel;
 
     @Override
     protected void initialize(Application app) {
@@ -54,12 +56,16 @@ public class LoginState extends BaseAppState {
         loginForm = new Container();
         guiNode.attachChild(loginForm);
 
-        loginForm.addChild(new Label("Username:")).setFontSize(40);
+        usernameLabel=loginForm.addChild(new Label("Username:"));
+        usernameLabel.setFontSize(40);
+        usernameLabel.setColor(ColorRGBA.White);
         usernameField = loginForm.addChild(new TextField(username), 1);
         usernameField.setPreferredWidth(200);
         usernameField.setFontSize(40);
 
-        loginForm.addChild(new Label("Password:")).setFontSize(40);
+        passwordLabel=loginForm.addChild(new Label("Password:"));
+        passwordLabel.setFontSize(40);
+        passwordLabel.setColor(ColorRGBA.White);
         passwordField = loginForm.addChild(new PasswordField(password), 1);
         passwordField.setPreferredWidth(200);
         passwordField.setFontSize(40);
