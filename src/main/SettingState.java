@@ -104,7 +104,7 @@ public class SettingState extends BaseAppState {
         // 移动速度设置
        moveSpeedLabel=settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
                " seconds per move"));
-       moveSpeedLabel.setFontSize(40);
+       moveSpeedLabel.setFontSize(24);
        moveSpeedLabel.setColor(ColorRGBA.White);
         Slider moveSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.1f, 1.5f,
                 moveSpeed)), 1);
@@ -119,7 +119,7 @@ public class SettingState extends BaseAppState {
         // 旋转速度设置
         rotateSpeedLabel=settingForm.addChild(new Label("Rotate Speed: " + String.format("%.2f", rotateSpeed) +
                 " seconds per rotation"));
-        rotateSpeedLabel.setFontSize(40);
+        rotateSpeedLabel.setFontSize(24);
         rotateSpeedLabel.setColor(ColorRGBA.White);
         Slider rotateSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.1f, 3.0f,
                 rotateSpeed)), 1);
@@ -134,7 +134,7 @@ public class SettingState extends BaseAppState {
         // 求解器时间限制设置
         solverTimeLimitLabel=settingForm.addChild(new Label("Solver Time Limit: " + String.format("%d", solverTimeLimit) +
                 " seconds"));
-        solverTimeLimitLabel.setFontSize(40);
+        solverTimeLimitLabel.setFontSize(24);
         solverTimeLimitLabel.setColor(ColorRGBA.White);
         Slider solverTimeLimitSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(1.0f, 30.0f,
                 solverTimeLimit)), 1);
