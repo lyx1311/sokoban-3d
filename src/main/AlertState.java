@@ -17,6 +17,7 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class AlertState extends BaseAppState {
+    private static final float deltaX = 200; // 弹框相对于屏幕中央的水平偏移
     private static final float startHeight = 200; // 弹框相对于屏幕中央的初始高度
     private static final float endHeight = 300; // 弹框相对于屏幕中央的最终高度
     private static final float stopMovingTime = 0.8f; // 弹框从初始高度到最终高度的时间（秒）
@@ -106,7 +107,7 @@ public class AlertState extends BaseAppState {
 
         // 设置弹框位置
         alertBox.setLocalTranslation(
-                app.getCamera().getWidth() / 2f - 200,
+                app.getCamera().getWidth() / 2f - deltaX,
                 app.getCamera().getHeight() / 2f + startHeight - location * interval,
                 1
         );
@@ -164,13 +165,13 @@ public class AlertState extends BaseAppState {
 
             // 设置弹框位置
             alertBox.setLocalTranslation(
-                    app.getCamera().getWidth() / 2f - 150,
+                    app.getCamera().getWidth() / 2f - deltaX,
                     app.getCamera().getHeight() / 2f + height,
                     1
             );
         } else {
             alertBox.setLocalTranslation(
-                    app.getCamera().getWidth() / 2f - 150,
+                    app.getCamera().getWidth() / 2f - deltaX,
                     app.getCamera().getHeight() / 2f + endHeight - location * interval,
                     1
             );
