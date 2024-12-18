@@ -35,6 +35,7 @@ public class AlertState extends BaseAppState {
     private RawInputListener inputInterceptor; // 用于监测鼠标输入
     private int location = 0; // 弹框是第几个
     private float timer = 0;  // 用于计时
+    private Label titleLabel, messageLabel;
 
     public AlertState(String title, String message) {
         this.title = title;
@@ -95,10 +96,14 @@ public class AlertState extends BaseAppState {
         alertBox = new Container();
 
         // 添加标题
-        alertBox.addChild(new Label(title)).setFontSize(24);
+        titleLabel = alertBox.addChild(new Label(title));
+        titleLabel.setFontSize(24);
+        titleLabel.setColor(new com.jme3.math.ColorRGBA(1, 1, 1, 1));
 
         // 添加消息内容
-        alertBox.addChild(new Label(message)).setFontSize(18);
+        messageLabel = alertBox.addChild(new Label(message));
+        messageLabel.setFontSize(18);
+        messageLabel.setColor(new com.jme3.math.ColorRGBA(1, 1, 1, 1));
 
         // 设置弹框位置
         alertBox.setLocalTranslation(
