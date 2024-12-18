@@ -6,6 +6,7 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
@@ -129,9 +130,11 @@ public class MenuState extends BaseAppState {
         menu = new Container();
 
         Label levelLabel = menu.addChild(new Label("Level " + level));
+        levelLabel.setColor(new ColorRGBA(1,1,1,1));
         levelLabel.setFontSize(30);
 
         stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
+        stepsLabel.setColor(new ColorRGBA(1,1,1,1));
         stepsLabel.setFontSize(24);
 
         help = new Picture("help");

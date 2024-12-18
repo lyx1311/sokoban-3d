@@ -59,7 +59,7 @@ public class Main extends SimpleApplication {
     private static Geometry cubeGeo;
     private static DirectionalLight cubeLight;
     public static void createBackground(Application app) {
-        Mesh cube = new Box(1, 1, 1);
+        Mesh cube = new Box((float) 3/2, (float) 3/2, (float) 3/2);
         cubeGeo = new Geometry("Cube", cube);
         ((SimpleApplication) app).getRootNode().attachChild(cubeGeo);
         Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");

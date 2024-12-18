@@ -92,10 +92,10 @@ public class SettingState extends BaseAppState {
         });*/
 
         back = new Picture("back");
-        back.setImage(app.getAssetManager(), "back1.png", true);
-        back.setWidth(100);
-        back.setHeight(100);
-        back.setLocalTranslation(12, app.getCamera().getHeight() - 300 , 0);
+        back.setImage(app.getAssetManager(), "buttonback.png", true);
+        back.setWidth(193);
+        back.setHeight(60);
+        back.setLocalTranslation(20, app.getCamera().getHeight() - 300 , 0);
         guiNode.attachChild(back);
 
         // 移动速度设置

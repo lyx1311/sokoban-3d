@@ -78,6 +78,7 @@ public class LevelSelectionState extends BaseAppState {
         usernameLabel = new Label(Main.username);
         usernameLabel.setFontSize(45);
         usernameLabel.setLocalTranslation(230, app.getCamera().getHeight() - 10, 0);
+        usernameLabel.setColor(new com.jme3.math.ColorRGBA(1, 1, 1, 1));
         guiNode.attachChild(usernameLabel);
 
         /*settingButton = new Button("Settings");
@@ -91,7 +92,7 @@ public class LevelSelectionState extends BaseAppState {
 
         settings = new Picture("settings");
         settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
-        settings.setWidth(357);
+        settings.setWidth(378);
         settings.setHeight(95);
         settings.setLocalTranslation(55, app.getCamera().getHeight()-675 , 0);
         guiNode.attachChild(settings);
@@ -109,6 +110,7 @@ public class LevelSelectionState extends BaseAppState {
             Button levelButton = levelSelectionForm.addChild(new Button("Level " + i + "        "),
                     (i - 1) / 3, (i - 1) % 3);
             levelButton.setFontSize(40);
+            levelButton.setColor(new com.jme3.math.ColorRGBA(1, 1, 1, 1));
             final int level = i;
             levelButton.addClickCommands(source -> {
                 Main.removeBackground(app); // 移除背景图片
@@ -118,6 +120,7 @@ public class LevelSelectionState extends BaseAppState {
             });
         }
         levelSelectionForm.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0); // 设置窗口位置
+
 
         /*backButton = new Button("Log Out and Back");
         backButton.setFontSize(24);
@@ -132,8 +135,8 @@ public class LevelSelectionState extends BaseAppState {
 
         back = new Picture("back");
         back.setImage(app.getAssetManager(), "back.png", true);
-        back.setWidth(668);
-        back.setHeight(100);
+        back.setWidth(641);
+        back.setHeight(96);
         back.setLocalTranslation(55, app.getCamera().getHeight() - 800 , 0);
         guiNode.attachChild(back);
     }
