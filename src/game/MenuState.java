@@ -86,10 +86,6 @@ public class MenuState extends BaseAppState {
                         if (checkWorking()) return;
 
                         gameState.startSolving();
-                        getStateManager().attach(new AlertState(
-                                "AI Solving",
-                                "Please wait for a moment."
-                        ));
                     }
 
                     gameState.closeMenu();

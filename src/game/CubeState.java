@@ -411,8 +411,8 @@ public class CubeState extends BaseAppState {
         isWin = true;
     }
 
-    private void checkDeadlock() {
-        if (isWin) return;
+    private boolean checkDeadlock() {
+        if (isWin) return false;
 
         final int dx[] = {0, 1, 0, -1};
         final int dy[] = {1, 0, -1, 0};
@@ -438,7 +438,7 @@ public class CubeState extends BaseAppState {
                         "Deadlock Detected",
                         "A box cannot be moved. Press 'U' to undo."
                 ));
-                return;
+                return true;
             }
             if (!adjacent) allImmovable = false;
         }
@@ -448,7 +448,10 @@ public class CubeState extends BaseAppState {
                     "Deadlock Detected",
                     "All boxes are immovable. Press 'U' to undo."
             ));
+            return true;
         }
+
+        return false;
     }
 
     public void undo() {
@@ -673,6 +676,15 @@ public class CubeState extends BaseAppState {
 
     public void solve(Consumer<String> handler) {
         if (isWin) throw new IllegalStateException("Game is already won.");
+        if (checkDeadlock()) {
+            handler.accept(null);
+            return;
+        }
+
+        getStateManager().attach(new AlertState(
+                "AI Solving",
+                "Please wait for a moment."
+        ));
 
         char[][] newMap = new char[rows][cols];
         for (int i = 0; i < rows; i++) System.arraycopy(map[i], 0, newMap[i], 0, cols);
