@@ -68,7 +68,7 @@ public class Main extends SimpleApplication {
         cubeLight = new DirectionalLight();
         cubeLight.setDirection(new Vector3f(-1, -2, -3));
         ((SimpleApplication) app).getRootNode().addLight(cubeLight);
-        app.getCamera().setLocation(new Vector3f(2.98f, 4.98f, 7.19f));
+        app.getCamera().setLocation(new Vector3f(2.78f, 4.98f, 7.19f));
         app.getCamera().setRotation(new Quaternion(-0.08f, 0.92f, -0.27f, -0.26f));
     }
     public static void removeBackground(Application app) {

@@ -92,8 +92,8 @@ public class LevelSelectionState extends BaseAppState {
 
         settings = new Picture("settings");
         settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
-        settings.setWidth(378);
-        settings.setHeight(95);
+        settings.setWidth(275);
+        settings.setHeight(70);
         settings.setLocalTranslation(55, app.getCamera().getHeight()-675 , 0);
         guiNode.attachChild(settings);
 
@@ -135,8 +135,8 @@ public class LevelSelectionState extends BaseAppState {
 
         back = new Picture("back");
         back.setImage(app.getAssetManager(), "back.png", true);
-        back.setWidth(641);
-        back.setHeight(96);
+        back.setWidth(467);
+        back.setHeight(70);
         back.setLocalTranslation(55, app.getCamera().getHeight() - 800 , 0);
         guiNode.attachChild(back);
     }

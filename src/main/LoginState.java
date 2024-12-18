@@ -66,20 +66,20 @@ public class LoginState extends BaseAppState {
 
         logInPicture = new Picture("LogIn");
         logInPicture.setImage(app.getAssetManager(), "buttonlogin.png", true);
-        logInPicture.setWidth(384);
-        logInPicture.setHeight(100);
-        logInPicture.setLocalTranslation(250, app.getCamera().getHeight() - 450, 0);
+        logInPicture.setWidth(192);
+        logInPicture.setHeight(50);
+        logInPicture.setLocalTranslation(150, app.getCamera().getHeight() - 450, 0);
         guiNode.attachChild(logInPicture);
 
         backPicture = new Picture("Back");
         backPicture.setImage(app.getAssetManager(), "buttonback.png", true);
-        backPicture.setWidth(322);
-        backPicture.setHeight(100);
-        backPicture.setLocalTranslation(250, app.getCamera().getHeight() - 600, 0);
+        backPicture.setWidth(161);
+        backPicture.setHeight(50);
+        backPicture.setLocalTranslation(150, app.getCamera().getHeight() - 600, 0);
         guiNode.attachChild(backPicture);
 
         // 设置窗口位置
-        loginForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
+        loginForm.setLocalTranslation(150, app.getCamera().getHeight() - 200, 0);
     }
 
     private void initInput() {

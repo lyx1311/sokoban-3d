@@ -75,20 +75,20 @@ public class RegisterState extends BaseAppState {
 
         registerPicture = new Picture("Register");
         registerPicture.setImage(app.getAssetManager(), "buttonregister.png", true);
-        registerPicture.setWidth(478);
-        registerPicture.setHeight(100);
-        registerPicture.setLocalTranslation(250, app.getCamera().getHeight() - 500, 0);
+        registerPicture.setWidth(239);
+        registerPicture.setHeight(50);
+        registerPicture.setLocalTranslation(150, app.getCamera().getHeight() - 500, 0);
         guiNode.attachChild(registerPicture);
 
         backPicture = new Picture("Back");
         backPicture.setImage(app.getAssetManager(), "buttonback.png", true);
-        backPicture.setWidth(322);
-        backPicture.setHeight(100);
-        backPicture.setLocalTranslation(250, app.getCamera().getHeight() - 650, 0);
+        backPicture.setWidth(161);
+        backPicture.setHeight(50);
+        backPicture.setLocalTranslation(150, app.getCamera().getHeight() - 650, 0);
         guiNode.attachChild(backPicture);
 
         // 设置窗口位置
-        registerForm.setLocalTranslation(250, app.getCamera().getHeight() - 200, 0);
+        registerForm.setLocalTranslation(150, app.getCamera().getHeight() - 200, 0);
     }
 
     private void initInput() {
