@@ -18,7 +18,7 @@ import com.simsilica.lemur.style.BaseStyles;
 import game.GameState;
 
 public class LevelSelectionState extends BaseAppState {
-    private static final int LEVEL_COUNT = 18;
+    public static final int LEVEL_COUNT = 18;
 
     private Application app;
     private Node guiNode;

@@ -75,7 +75,6 @@ public class CameraControl extends AbstractControl {
             spatial.setLocalRotation(currentRotation);
             if (isEqual(currentRotation, endRotation)) {
                 spatial.setLocalRotation(endRotation);
-                System.out.println(" * Camera direction: " + spatial.getLocalTranslation());
                 isRotating = false;
             }
         }

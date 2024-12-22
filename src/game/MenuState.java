@@ -16,7 +16,9 @@ import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
 
-import main.*;
+import main.AlertState;
+import main.LevelSelectionState;
+import main.Main;
 
 public class MenuState extends BaseAppState {
     private Application app;
@@ -24,9 +26,9 @@ public class MenuState extends BaseAppState {
     private final CubeState cubeState;
     private int level;
     private Node guiNode;
-    private Container menu;
-    private Label stepsLabel;
-    private Picture help, solve, restart, back, close, load, save,stop;
+    private Container menu, wallet;
+    private Label stepsLabel, timeLabel;
+    private Picture help, solve, restart, back, close, load, save;
 
     public MenuState(GameState gameState, CubeState cubeState, int level) {
         this.gameState = gameState;
@@ -80,6 +82,14 @@ public class MenuState extends BaseAppState {
                         return;
                     }
 
+                    if (Main.getLevelStatus(level) != Main.SOLVER_BOUGHT && !Main.buySolver(level)) {
+                        getStateManager().attach(new AlertState(
+                                "Not Enough Money :(",
+                                "Please solve the level to get $" + Main.SOLVE_GAIN + "!"
+                        ));
+                        return;
+                    }
+
                     if (gameState.isSolving()) {
                         gameState.stopSolving();
                     } else {
@@ -123,41 +133,41 @@ public class MenuState extends BaseAppState {
     };
 
     private void initGui() {
+        initMenu();
+        guiNode.attachChild(menu); // 将菜单添加到 GUI 节点
+        if (!Main.username.equals("Visitor")) {
+            initWallet();
+            guiNode.attachChild(wallet); // 将钱包添加到 GUI 节点
+        }
+    }
+
+    private void initMenu() {
         menu = new Container();
 
         Label levelLabel = menu.addChild(new Label("Level " + level));
-        levelLabel.setColor(new ColorRGBA(1,1,1,1));
-        levelLabel.setFontSize(30);
+        levelLabel.setColor(new ColorRGBA(1, 1, 1, 1));
+        levelLabel.setFontSize(36);
 
         stepsLabel = menu.addChild(new Label("Steps: " + cubeState.getSteps()));
-        stepsLabel.setColor(new ColorRGBA(1,1,1,1));
+        stepsLabel.setColor(new ColorRGBA(1, 1, 1, 1));
         stepsLabel.setFontSize(24);
+
+        timeLabel = menu.addChild(new Label("Rest Time: " + cubeState.getTimeLeft() + "s"));
+        timeLabel.setColor(new ColorRGBA(1, 1, 1, 1));
+        timeLabel.setFontSize(24);
 
         help = new Picture("help");
         help.setImage(app.getAssetManager(), "menuhelp.png", true);
         help.setWidth(122);
         help.setHeight(50);
-        help.setLocalTranslation(10, app.getCamera().getHeight() - 150, 0);
+        help.setLocalTranslation(10, app.getCamera().getHeight() - 190, 0);
         guiNode.attachChild(help);
-
-        if (gameState.isSolving()) {
-            solve = new Picture("stop");
-            solve.setImage(app.getAssetManager(), "menustop.png", true);
-            solve.setWidth(183);
-        } else {
-            solve = new Picture("solve");
-            solve.setImage(app.getAssetManager(), "menusolve.png", true);
-            solve.setWidth(257);
-        }
-        solve.setHeight(50);
-        solve.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0);
-        guiNode.attachChild(solve);
 
         restart = new Picture("restart");
         restart.setImage(app.getAssetManager(), "menurestart.png", true);
         restart.setWidth(188);
         restart.setHeight(50);
-        restart.setLocalTranslation(10, app.getCamera().getHeight() - 250, 0);
+        restart.setLocalTranslation(10, app.getCamera().getHeight() - 240, 0);
         guiNode.attachChild(restart);
 
         if (!Main.username.equals("Visitor")) {
@@ -165,42 +175,55 @@ public class MenuState extends BaseAppState {
             load.setImage(app.getAssetManager(), "menuload.png", true);
             load.setWidth(131);
             load.setHeight(50);
-            load.setLocalTranslation(10, app.getCamera().getHeight() - 300, 0);
+            load.setLocalTranslation(10, app.getCamera().getHeight() - 290, 0);
             guiNode.attachChild(load);
 
             save = new Picture("save");
             save.setImage(app.getAssetManager(), "menusave.png", true);
             save.setWidth(137);
             save.setHeight(50);
-            save.setLocalTranslation(10, app.getCamera().getHeight() - 350, 0);
+            save.setLocalTranslation(10, app.getCamera().getHeight() - 340, 0);
             guiNode.attachChild(save);
+
+            if (gameState.isSolving()) {
+                solve = new Picture("stop");
+                solve.setImage(app.getAssetManager(), "menustop.png", true);
+                solve.setWidth(183);
+            } else {
+                solve = new Picture("solve");
+                solve.setImage(app.getAssetManager(), "menusolve.png", true);
+                solve.setWidth(257);
+            }
+            solve.setHeight(50);
+            solve.setLocalTranslation(10, app.getCamera().getHeight() - 390, 0);
+            guiNode.attachChild(solve);
 
             back = new Picture("back");
             back.setImage(app.getAssetManager(), "menuback.png", true);
             back.setWidth(135);
             back.setHeight(50);
-            back.setLocalTranslation(10, app.getCamera().getHeight() - 400, 0);
+            back.setLocalTranslation(10, app.getCamera().getHeight() - 440, 0);
             guiNode.attachChild(back);
 
             close = new Picture("close");
             close.setImage(app.getAssetManager(), "menuclose.png", true);
             close.setWidth(178);
             close.setHeight(50);
-            close.setLocalTranslation(10, app.getCamera().getHeight() - 450, 0);
+            close.setLocalTranslation(10, app.getCamera().getHeight() - 490, 0);
             guiNode.attachChild(close);
         } else {
             back = new Picture("back");
             back.setImage(app.getAssetManager(), "menuback.png", true);
             back.setWidth(135);
             back.setHeight(50);
-            back.setLocalTranslation(10, app.getCamera().getHeight() - 300, 0);
+            back.setLocalTranslation(10, app.getCamera().getHeight() - 290, 0);
             guiNode.attachChild(back);
 
             close = new Picture("close");
             close.setImage(app.getAssetManager(), "menuclose.png", true);
             close.setWidth(178);
             close.setHeight(50);
-            close.setLocalTranslation(10, app.getCamera().getHeight() - 350, 0);
+            close.setLocalTranslation(10, app.getCamera().getHeight() - 340, 0);
             guiNode.attachChild(close);
         }
 
@@ -208,9 +231,29 @@ public class MenuState extends BaseAppState {
         menu.setLocalTranslation(10, app.getCamera().getHeight() - 10, 1);
     }
 
-    public void updateSteps() {
-        stepsLabel.setText("Steps: " + cubeState.getSteps());
+    private void initWallet() {
+        wallet = new Container();
+
+        Label walletMoney = wallet.addChild(new Label("Money: $" + Main.getMoney()));
+        walletMoney.setColor(new ColorRGBA(1, 1, 1, 1));
+        walletMoney.setFontSize(32);
+
+        Label walletHint1 = wallet.addChild(new Label("Solve the level in time to get $" + Main.SOLVE_GAIN + "!"));
+        walletHint1.setColor(new ColorRGBA(1, 1, 1, 1));
+        walletHint1.setFontSize(20);
+
+        Label walletHint2 = wallet.addChild(new Label(Main.getLevelStatus(level) == Main.SOLVER_BOUGHT ?
+                "You've bought the solver!" :
+                "Buy a solver for $" + Main.SOLVER_COST + "!"
+        ));
+        walletHint2.setColor(new ColorRGBA(1, 1, 1, 1));
+        walletHint2.setFontSize(20);
+
+        // 设置窗口位置
+        wallet.setLocalTranslation(app.getCamera().getWidth() - 305, app.getCamera().getHeight() - 10, 1);
     }
+
+    public void updateSteps() { stepsLabel.setText("Steps: " + cubeState.getSteps()); }
 
     private boolean checkSolverWorking() {
         if (gameState.isSolverWorking()) {
@@ -239,9 +282,11 @@ public class MenuState extends BaseAppState {
     @Override
     protected void onEnable() {
         initGui(); // 初始化 GUI
-        guiNode.attachChild(menu); // 将菜单添加到 GUI 节点
-        initInput();
+        initInput(); // 初始化输入监听
     }
+
+    @Override
+    public void update(float tpf) { timeLabel.setText("Time Left: " + cubeState.getTimeLeft() + "s"); }
 
     @Override
     protected void onDisable() {
@@ -250,20 +295,24 @@ public class MenuState extends BaseAppState {
         }
         menu.detachAllChildren(); // 移除所有子节点
         menu.removeFromParent(); // 将菜单从 GUI 节点移除
+
         help.removeFromParent();
-        solve.removeFromParent();
         restart.removeFromParent();
         back.removeFromParent();
         close.removeFromParent();
+
         if (!Main.username.equals("Visitor")) {
+            wallet.detachAllChildren(); // 移除所有子节点
+            wallet.removeFromParent(); // 将钱包从 GUI 节点移除
             load.removeFromParent();
             save.removeFromParent();
+            solve.removeFromParent();
         }
+
         app.getInputManager().removeListener(actionListener);
         app.getInputManager().deleteMapping("ClickMenu");
     }
 
     @Override
-    protected void cleanup(Application app) {
-    }
+    protected void cleanup(Application app) {}
 }

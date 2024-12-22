@@ -12,7 +12,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.*;
@@ -24,7 +23,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
-import com.jme3.util.SkyFactory;
+import jme3utilities.sky.SkyControl;
+import jme3utilities.sky.StarsOption;
 
 import main.AlertState;
 import main.Main;
@@ -36,12 +36,16 @@ public class CubeState extends BaseAppState {
     private static final String IMAGE_PATH = "images/";
     private static final float EPS = 1e-4f;
     private static final float SIDE = 10f;
+    private static final float TRANSPARENT = 0.2f;
     private static final Vector3f UNIT_U = new Vector3f(-1f, 0f, 0f);
     private static final Vector3f UNIT_D = new Vector3f(1f, 0f, 0f);
     private static final Vector3f UNIT_L = new Vector3f(0f, 0f, 1f);
     private static final Vector3f UNIT_R = new Vector3f(0f, 0f, -1f);
-    private static final Vector3f sunLightDir = new Vector3f(-0.65f, -0.12f, 0.75f);
+//    private static final Vector3f SUN_LIGHT_DIR = new Vector3f(-0.65f, -0.12f, 0.75f);
     public static final float MAX_HEIGHT = 150f;
+    private static final float START_HOUR = 15.5f;
+    private static final float END_HOUR = 18.5f;
+    private static final float STOP_HOUR = 23.5f;
 
     private Application app;
     private AssetManager assetManager;
@@ -49,15 +53,17 @@ public class CubeState extends BaseAppState {
     private int level, rows, cols, heroX, heroY;
     private char[][] map = null;
     private Node rootNode = new Node("Scene Root");
+    private SkyControl skyControl;
     private AmbientLight ambientLight; // 环境光
-    private DirectionalLight sunLight; // 太阳光
+//    private DirectionalLight sunLight; // 太阳光
     private SSAOFilter ssao = new SSAOFilter(7f, 14f, 0.4f, 0.6f); // 屏幕空间环境光遮蔽
     private Node cameraNode;
     private CameraControl cameraControl;
     private HashMap<Integer, Geometry> boxes = new HashMap<>();
     private HashSet<Integer> goals = new HashSet<>();
     private String steps = new String();
-    private boolean isWin = false;
+    private boolean isWin = false, isTimeOut = false;
+    private float sunsetTime = 90f, timeElapsed = 0f;
 
     public CubeState(int level) { this.level = level; }
 
@@ -88,12 +94,12 @@ public class CubeState extends BaseAppState {
     }
 
     private void initSky() {
-        Spatial sky = SkyFactory.createSky(
-                assetManager,
-                "Scenes/Beach/FullskiesSunset0068.dds",
-                SkyFactory.EnvMapType.CubeMap);
-        sky.setLocalScale(350); // 天空盒大小
-        rootNode.attachChild(sky);
+        skyControl = new SkyControl(assetManager, app.getCamera(), 0.5f, StarsOption.Cube, true);
+        skyControl.getSunAndStars().setHour(START_HOUR);
+        skyControl.getSunAndStars().setObserverLatitude(0.5f);
+        skyControl.getSunAndStars().setSolarLongitude(0f);
+        rootNode.addControl(skyControl);
+        skyControl.setEnabled(true);
     }
 
     private void initCubes() {
@@ -113,6 +119,8 @@ public class CubeState extends BaseAppState {
                             map[i].length + " columns (" + map[i] + "), expected " + cols);
                 }
             }
+            if (sc.hasNext()) sunsetTime = sc.nextFloat();
+            if (sc.hasNext()) throw new IllegalArgumentException("Invalid map data: too many lines");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -186,7 +194,7 @@ public class CubeState extends BaseAppState {
         // 创建材质
         Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         material.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off); // 禁用背面剔除
-        material.setColor("Color", new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
+        material.setColor("Color", new ColorRGBA(1f, 1f, 0f, TRANSPARENT)); // 半透明黄色
         material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
         holyLight.setMaterial(material); // 设置材质
         holyLight.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
@@ -196,7 +204,7 @@ public class CubeState extends BaseAppState {
 
         // 在地面上对应位置添加一个矩形
 //        Geometry geom = new Geometry("Goal", new Quad(side * 2, side * 2));
-//        Material mat = getMaterial(new ColorRGBA(1f, 1f, 0f, 0.2f)); // 半透明黄色
+//        Material mat = getMaterial(new ColorRGBA(1f, 1f, 0f, TRANSPARENT)); // 半透明黄色
 //        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha); // 启用透明
 //        geom.setMaterial(material); // 设置材质
 //        geom.setQueueBucket(RenderQueue.Bucket.Transparent); // 设置为透明队列
@@ -222,9 +230,9 @@ public class CubeState extends BaseAppState {
         ambientLight = new AmbientLight();
         ambientLight.setColor(new ColorRGBA(0.4f, 0.4f, 0.4f, 1f));
 
-        sunLight = new DirectionalLight();
-        sunLight.setDirection(sunLightDir);
-        sunLight.setColor(new ColorRGBA(0.6f, 0.6f, 0.6f, 1f));
+//        sunLight = new DirectionalLight();
+//        sunLight.setDirection(SUN_LIGHT_DIR);
+//        sunLight.setColor(new ColorRGBA(0.6f, 0.6f, 0.6f, 1f));
     }
 
     private Vector3f hero() { return new Vector3f((heroX + 1) * SIDE * 2, SIDE, -(heroY + 1) * SIDE * 2); }
@@ -235,6 +243,7 @@ public class CubeState extends BaseAppState {
     }
 
     public int getSteps() { return steps.length(); }
+    public int getTimeLeft() { return Math.max((int) Math.ceil(sunsetTime - timeElapsed), 0); }
     public boolean inMotion() { return cameraControl.isMoving() || cameraControl.isRotating() || cameraControl.isMovingFlyCam(); }
     public boolean isFlying() { return cameraControl.isFlying(); }
     public boolean isWin() { return isWin; }
@@ -254,11 +263,6 @@ public class CubeState extends BaseAppState {
                 q1.mult(Vector3f.UNIT_Z).distance(q2.mult(Vector3f.UNIT_Z)) < EPS;
     }
     private static char dirToChar(Vector3f direction) {
-        System.out.println(direction);
-        if (isParallel(direction, UNIT_U)) System.out.println("u");
-        if (isParallel(direction, UNIT_D)) System.out.println("d");
-        if (isParallel(direction, UNIT_L)) System.out.println("l");
-        if (isParallel(direction, UNIT_R)) System.out.println("r");
         if (isParallel(direction, UNIT_U)) return 'u';
         if (isParallel(direction, UNIT_D)) return 'd';
         if (isParallel(direction, UNIT_L)) return 'l';
@@ -324,8 +328,8 @@ public class CubeState extends BaseAppState {
         heroY = y;
 
         // 检查胜利并存档
-        checkWin();
         steps += dirToChar(direction);
+        if (showAnimation) checkWin();
 
         return true;
     }
@@ -345,7 +349,7 @@ public class CubeState extends BaseAppState {
     private boolean pushBox(Vector3f direction, boolean showAnimation) {
         if (inMotion() || isFlying()) throw new IllegalStateException("Camera is in motion or flying.");
 
-        System.out.println("Push box: " + direction);
+//        System.out.println("Push box: " + direction);
 
         Vector3f startPosition = hero();
         Vector3f endPosition = startPosition.add(direction.mult(2 * SIDE));
@@ -355,11 +359,11 @@ public class CubeState extends BaseAppState {
 
         // 判断是否可以推箱子
         if (x < 0 || x >= rows || y < 0 || y >= cols || map[x][y] != 'B') {
-            System.out.println("Cannot push box at (" + x + ", " + y + "). rows = " + rows + ", cols = " + cols);
-            for (int id : boxes.keySet()) {
-                int bx = hashX(id), by = hashY(id);
-                System.out.println(" - Box at (" + bx + ", " + by + ")");
-            }
+//            System.out.println("Cannot push box at (" + x + ", " + y + "). rows = " + rows + ", cols = " + cols);
+//            for (int id : boxes.keySet()) {
+//                int bx = hashX(id), by = hashY(id);
+//                System.out.println(" - Box at (" + bx + ", " + by + ")");
+//            }
             return false;
         }
 
@@ -375,7 +379,7 @@ public class CubeState extends BaseAppState {
         } else {
             boxes.get(hashId(x, y)).move(direction.mult(2 * SIDE));
             boxes.put(hashId(bx, by), boxes.remove(hashId(x, y)));
-            System.out.println("Move box: " + x + ", " + y + " -> " + bx + ", " + by);
+//            System.out.println("Move box: " + x + ", " + y + " -> " + bx + ", " + by);
         }
 
         // 移动相机
@@ -390,9 +394,11 @@ public class CubeState extends BaseAppState {
         map[bx][by] = 'B';
 
         // 检查胜利并存档
-        checkWin();
         steps += Character.toUpperCase(dirToChar(direction));
-        checkDeadlock();
+        if (showAnimation) {
+            checkWin();
+            checkDeadlock();
+        }
 
         return true;
     }
@@ -409,6 +415,8 @@ public class CubeState extends BaseAppState {
         ));
 
         isWin = true;
+
+        if (Main.getLevelStatus(level) == Main.UNSOLVED) Main.solveLevel(level);
     }
 
     private boolean checkDeadlock() {
@@ -522,7 +530,7 @@ public class CubeState extends BaseAppState {
         Quaternion newRotation = new Quaternion().fromAngles(angles[0], newYaw, angles[2]);
 
         // 应用新的旋转角度到相机
-        cameraControl.rotateCamera(currentRotation, newRotation, SettingState.getRotateSpeed());
+        cameraControl.rotateCamera(currentRotation, newRotation, isFlying() ? 0.8f : SettingState.getRotateSpeed());
     }
 
     public void reverseFly() {
@@ -541,6 +549,7 @@ public class CubeState extends BaseAppState {
         }
     }
     public void startMoveFlyCam(String instruction) {
+        if (cameraControl.isRotating()) return;
         if (instruction.equals("PushBox")) {
             cameraControl.startMoveFlyCam(new Vector3f(0, 1, 0));
         } else {
@@ -554,7 +563,8 @@ public class CubeState extends BaseAppState {
     public void restart() {
         if (inMotion()) throw new IllegalStateException("Camera is in motion.");
 
-        isWin = false;
+        isWin = isTimeOut = false;
+        timeElapsed = 0f;
         if (isFlying()) reverseFly();
 
         for (Spatial child : rootNode.getChildren()) {
@@ -595,7 +605,7 @@ public class CubeState extends BaseAppState {
         while (lines.size() < level) lines.add("");
 
         // 修改第 k 行
-        lines.set(level - 1, steps);
+        lines.set(level - 1, steps + " " + timeElapsed);
 
         // 将修改后的内容写回文件
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(archiveFile))) {
@@ -616,7 +626,9 @@ public class CubeState extends BaseAppState {
     private boolean tryLoad(String s) {
         restart();
         for (char c : s.toCharArray()) {
-            if(!(Character.isLowerCase(c) ? moveHero(charToDir(c), false) :
+            char cLower = Character.toLowerCase(c);
+            if (cLower != 'u' && cLower != 'd' && cLower != 'l' && cLower != 'r') return false;
+            if (!(Character.isLowerCase(c) ? moveHero(charToDir(c), false) :
                     pushBox(charToDir(c), false))) return false;
         }
         return true;
@@ -639,35 +651,52 @@ public class CubeState extends BaseAppState {
             throw new IllegalStateException("Archive file not found: " + archiveFile);
         }
 
-        boolean load = false;
+        if (linesRead != level || line.isEmpty()) {
+            getStateManager().attach(new AlertState(
+                    "No Archive",
+                    "No archive found for " + Main.username + " at level " + level + "."
+            ));
+            return false;
+        }
 
-        if (linesRead == level && !line.isEmpty()) {
-            String previousSteps = steps;
-            steps = new String();
+        boolean load = true;
+        String previousSteps = steps, split[] = line.split(" "), trySteps = null;
+        float tryTimeElapsed = 0f;
+        steps = new String();
 
-            if (tryLoad(line)) {
-                load = true;
+        if (split.length != 2) {
+            load = false;
+        } else {
+            trySteps = split[0];
+            try {
+                tryTimeElapsed = Float.parseFloat(split[1]);
+            } catch (NumberFormatException e) {
+                load = false;
+            }
+        }
+
+        if (load) {
+            if (tryLoad(trySteps)) {
                 getStateManager().attach(new AlertState(
                         "Game Loaded",
                         "The archive has been loaded successfully."
                 ));
 
+                timeElapsed = tryTimeElapsed;
+                update(0);
                 checkWin();
                 checkDeadlock();
             } else {
-                getStateManager().attach(new AlertState(
-                        "Invalid Archive",
-                        "The archive for level " + level + " is invalid."
-                ));
-
-                if(!tryLoad(previousSteps)) throw new IllegalStateException("Invalid previous steps: " + previousSteps);
+                if (!tryLoad(previousSteps)) throw new IllegalStateException("Invalid previous steps: " + previousSteps);
             }
 
             initCamera();
-        } else {
+        }
+
+        if (!load) {
             getStateManager().attach(new AlertState(
-                    "No Archive",
-                    "No archive found for " + Main.username + " at level " + level + "."
+                    "Invalid Archive",
+                    "The archive for level " + level + " is invalid."
             ));
         }
 
@@ -706,11 +735,28 @@ public class CubeState extends BaseAppState {
 
         app.getRootNode().attachChild(rootNode);
         app.getRootNode().addLight(ambientLight);
-        app.getRootNode().addLight(sunLight);
+//        app.getRootNode().addLight(sunLight);
 
         filterState = new FilterState();
         filterState.add(ssao);
         getStateManager().attach(filterState);
+    }
+
+    private void moveSun() {
+        // 减弱环境光
+        float intensity = 1 - 0.9f * Math.min(timeElapsed / sunsetTime, 1);
+        ambientLight.setColor(new ColorRGBA(intensity, intensity, intensity, 1f));
+
+        // 移动太阳
+        if (timeElapsed >= sunsetTime) {
+            float hour = END_HOUR + (timeElapsed - sunsetTime) / 20;
+            if (hour >= STOP_HOUR) hour = STOP_HOUR;
+            skyControl.getSunAndStars().setHour(hour);
+            return;
+        }
+
+        float hour = START_HOUR + timeElapsed / sunsetTime * (END_HOUR - START_HOUR);
+        skyControl.getSunAndStars().setHour(hour);
     }
 
     @Override
@@ -718,16 +764,20 @@ public class CubeState extends BaseAppState {
         // 同步摄像机位置和旋转
         app.getCamera().setLocation(cameraNode.getWorldTranslation());
         app.getCamera().setRotation(cameraNode.getWorldRotation());
-    }
 
-//    @Override
-//    public void update(float tpf) {
-//        // 移动太阳光
-//        float newX = sunLightDir.x + tpf * 1f;
-//        float newZ = sunLightDir.z + tpf * 1f;
-//        sunLightDir.set(newX, sunLightDir.y, newZ).normalizeLocal();
-//        sunLight.setDirection(sunLightDir);
-//    }
+        // 更新时间
+        if (!isWin) timeElapsed += tpf;
+        moveSun();
+
+        // 检查是否达到太阳落山时间
+        if (timeElapsed >= sunsetTime && !isTimeOut) {
+            isTimeOut = true;
+            getStateManager().attach(new AlertState(
+                    "Time Is Up",
+                    "You have run out of time, so no reward for you. Please try again."
+            ));
+        }
+    }
 
     @Override
     protected void onDisable() {
@@ -735,7 +785,7 @@ public class CubeState extends BaseAppState {
 
         rootNode.removeFromParent();
         app.getRootNode().removeLight(ambientLight);
-        app.getRootNode().removeLight(sunLight);
+//        app.getRootNode().removeLight(sunLight);
 
         if (Monkey.isAdded()) Monkey.remove();
 

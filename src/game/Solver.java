@@ -146,7 +146,6 @@ public abstract class Solver {
         queue.add(status);
         visited.put(status, true);
 
-        int statusCount = 0;
         while (!queue.isEmpty()) {
             Status cur = queue.poll();
             Position hero = cur.getHero();
@@ -170,6 +169,23 @@ public abstract class Solver {
                         if (isBox) {
                             valid = false;
                             break;
+                        }
+
+                        if (map[nextPos.x][nextPos.y] != '.') {
+                            boolean flag = false;
+                            for (int dir2 = 0; dir2 < 4; dir2++) {
+                                Position nextPos2 = new Position(nextPos.x + dx[dir2], nextPos.y + dy[dir2]);
+                                int dir3 = (dir2 + 1) % 4;
+                                Position nextPos3 = new Position(nextPos.x - dx[dir3], nextPos.y - dy[dir3]);
+                                if (map[nextPos2.x][nextPos2.y] == '#' && map[nextPos3.x][nextPos3.y] == '#') {
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                            if (flag) {
+                                valid = false;
+                                break;
+                            }
                         }
 
                         boxes[i] = nextPos;
@@ -198,7 +214,6 @@ public abstract class Solver {
                 visited.put(next, true);
             }
 
-            statusCount++;
             if ((System.currentTimeMillis() - startTime) * MAX_RATE > SettingState.getSolverTimeLimit() * 1000) {
                 if (rate == MAX_RATE) {
                     app.getStateManager().attach(new AlertState(

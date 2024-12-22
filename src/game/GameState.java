@@ -16,6 +16,7 @@ import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
+
 import main.Main;
 
 public class GameState extends BaseAppState {
@@ -66,49 +67,49 @@ public class GameState extends BaseAppState {
         fd.setImage(app.getAssetManager(), "fd.png", true);
         fd.setWidth(100);
         fd.setHeight(100);
-        fd.setLocalTranslation(app.getCamera().getWidth()-300, app.getCamera().getHeight() - 700 , 0);
+        fd.setLocalTranslation(app.getCamera().getWidth() - 300, app.getCamera().getHeight() - 700 , 0);
         guiNode.attachChild(fd);
 
         bk = new Picture("bk");
         bk.setImage(app.getAssetManager(), "bk.png", true);
         bk.setWidth(100);
         bk.setHeight(100);
-        bk.setLocalTranslation(app.getCamera().getWidth()-300, app.getCamera().getHeight() - 900 , 0);
+        bk.setLocalTranslation(app.getCamera().getWidth() - 300, app.getCamera().getHeight() - 900 , 0);
         guiNode.attachChild(bk);
 
         l = new Picture("l");
         l.setImage(app.getAssetManager(), "l.png", true);
         l.setWidth(100);
         l.setHeight(100);
-        l.setLocalTranslation(app.getCamera().getWidth()-400, app.getCamera().getHeight() - 800 , 0);
+        l.setLocalTranslation(app.getCamera().getWidth() - 400, app.getCamera().getHeight() - 800 , 0);
         guiNode.attachChild(l);
 
         r = new Picture("r");
         r.setImage(app.getAssetManager(), "r.png", true);
         r.setWidth(100);
         r.setHeight(100);
-        r.setLocalTranslation(app.getCamera().getWidth()-200, app.getCamera().getHeight() - 800 , 0);
+        r.setLocalTranslation(app.getCamera().getWidth() - 200, app.getCamera().getHeight() - 800 , 0);
         guiNode.attachChild(r);
 
         space = new Picture("space");
         space.setImage(app.getAssetManager(), "space.png", true);
         space.setWidth(100);
         space.setHeight(100);
-        space.setLocalTranslation(app.getCamera().getWidth()-300, app.getCamera().getHeight() - 800 , 0);
+        space.setLocalTranslation(app.getCamera().getWidth() - 300, app.getCamera().getHeight() - 800 , 0);
         guiNode.attachChild(space);
 
         Q = new Picture("Q");
         Q.setImage(app.getAssetManager(), "Q.png", true);
         Q.setWidth(100);
         Q.setHeight(350);
-        Q.setLocalTranslation(app.getCamera().getWidth()-500, app.getCamera().getHeight() - 900 , 0);
+        Q.setLocalTranslation(app.getCamera().getWidth() - 500, app.getCamera().getHeight() - 900 , 0);
         guiNode.attachChild(Q);
 
         E = new Picture("E");
         E.setImage(app.getAssetManager(), "E.png", true);
         E.setWidth(100);
         E.setHeight(350);
-        E.setLocalTranslation(app.getCamera().getWidth()-100, app.getCamera().getHeight() - 900 , 0);
+        E.setLocalTranslation(app.getCamera().getWidth() - 100, app.getCamera().getHeight() - 900 , 0);
         guiNode.attachChild(E);
     }
 

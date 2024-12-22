@@ -60,22 +60,21 @@ public class RegisterState extends BaseAppState {
         registerForm = new Container();
         guiNode.attachChild(registerForm);
 
-
-        usernameLabel=registerForm.addChild(new Label("Username:"));
+        usernameLabel = registerForm.addChild(new Label("Username:"));
         usernameLabel.setFontSize(40);
         usernameLabel.setColor(ColorRGBA.White);
         usernameField = registerForm.addChild(new TextField(username), 1);
         usernameField.setPreferredWidth(200);
         usernameField.setFontSize(40);
 
-        passwordLabel=registerForm.addChild(new Label("Password:"));
+        passwordLabel = registerForm.addChild(new Label("Password:"));
         passwordLabel.setFontSize(40);
         passwordLabel.setColor(ColorRGBA.White);
         passwordField = registerForm.addChild(new PasswordField(password), 1);
         passwordField.setPreferredWidth(200);
         passwordField.setFontSize(40);
 
-        confirmPasswordLabel=registerForm.addChild(new Label("Confirm Password:"));
+        confirmPasswordLabel = registerForm.addChild(new Label("Confirm Password:"));
         confirmPasswordLabel.setFontSize(40);
         confirmPasswordLabel.setColor(ColorRGBA.White);
         confirmPasswordField = registerForm.addChild(new PasswordField(confirmPassword), 1);
@@ -154,22 +153,19 @@ public class RegisterState extends BaseAppState {
                                         "lowercase letters, uppercase letters, digits, and special characters."
                         ));
                     } else {
-                        try {
-                            saveUser(username, password);
-                            getStateManager().attach(new AlertState(
-                                    "Registration Successful",
-                                    "User registered successfully!"
-                            ));
-                            createUserArchive(username);
+                        saveUser(username, password);
+                        getStateManager().attach(new AlertState(
+                                "Registration Successful",
+                                "User registered successfully!"
+                        ));
+                        createArchive(username);
+                        createStatus(username);
 
-                            Main.username = username; // 设置当前用户名
+                        Main.username = username; // 设置当前用户名
 
-                            getStateManager().detach(RegisterState.this);
-                            getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
-                            cleanup(); // 清理资源
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        getStateManager().detach(RegisterState.this);
+                        getStateManager().attach(new LevelSelectionState()); // 切换到关卡选择界面
+                        cleanup(); // 清理资源
                     }
 
                     onDisable();
@@ -196,9 +192,7 @@ public class RegisterState extends BaseAppState {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     String[] parts = line.split(" ");
-                    if (parts.length > 0 && parts[0].equals(username)) {
-                        return true;
-                    }
+                    if (parts.length == 2 && parts[0].equals(username)) return true;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -233,36 +227,61 @@ public class RegisterState extends BaseAppState {
     }
 
     // 保存新用户信息到用户列表文件
-    private void saveUser(String username, String password) throws IOException {
+    private void saveUser(String username, String password) {
         try (FileWriter writer = new FileWriter(USER_LIST_FILE, true)) {
             writer.write(username + " " + password + System.lineSeparator());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Failed to write to user list file!");
         }
     }
 
     // 创建用户存档文件
-    private void createUserArchive(String username) throws IOException {
+    private void createArchive(String username) {
         File archive = new File(ARCHIVE_FILE_PATH + username + "_archive.txt");
         if (!archive.getParentFile().exists()) archive.getParentFile().mkdirs();
         if (!archive.exists()) {
-            archive.createNewFile();
+            try {
+                archive.createNewFile();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Failed to create archive file for user " + username);
+            }
         } else {
             System.err.println("Archive file of " + username + " already exists!");
+        }
+    }
+
+    // 创建用户状态文件
+    private void createStatus(String username) {
+        File status = new File(ARCHIVE_FILE_PATH + username + "_status.txt");
+        if (!status.getParentFile().exists()) status.getParentFile().mkdirs();
+        if (!status.exists()) {
+            try {
+                status.createNewFile();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Failed to create status file for user " + username);
+            }
+            try (FileWriter writer = new FileWriter(status, true)) {
+                writer.write("0\n");
+                for (int i = 0; i < LevelSelectionState.LEVEL_COUNT; i++) writer.append(Main.UNSOLVED);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Failed to write to status file of user " + username);
+            }
+        } else {
+            System.err.println("Status file of " + username + " already exists!");
         }
     }
 
     @Override
     public void onEnable() {
         initGui(); // 初始化 GUI
-        initInput(); // 初始化输入
+        initInput(); // 初始化输入监听
     }
 
     @Override
     public void onDisable() {
-        ((GuiControl) usernameField.getControl(GuiControl.class)).focusLost();
-        ((GuiControl) passwordField.getControl(GuiControl.class)).focusLost();
-        ((GuiControl) confirmPasswordField.getControl(GuiControl.class)).focusLost();
+        usernameField.getControl(GuiControl.class).focusLost();
+        passwordField.getControl(GuiControl.class).focusLost();
+        confirmPasswordField.getControl(GuiControl.class).focusLost();
 
         registerForm.detachAllChildren(); // 移除表单的所有子节点
         registerForm.removeFromParent(); // 将表单从 GUI 节点移除

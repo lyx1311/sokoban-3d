@@ -1,5 +1,10 @@
 package main;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
 import com.jme3.app.state.BaseAppState;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -9,9 +14,7 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
-import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
@@ -19,9 +22,6 @@ import com.simsilica.lemur.PasswordField;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.core.GuiControl;
 import com.simsilica.lemur.style.BaseStyles;
-import java.io.File;
-import java.io.IOException;
-import java.util.Scanner;
 
 public class LoginState extends BaseAppState {
     private static final String USER_LIST_FILE = "archives/users.txt";
@@ -34,7 +34,7 @@ public class LoginState extends BaseAppState {
     private TextField usernameField;
     private PasswordField passwordField;
     private Picture logInPicture, backPicture;
-    private Label usernameLabel,passwordLabel;
+    private Label usernameLabel, passwordLabel;
 
     @Override
     protected void initialize(Application app) {
@@ -111,7 +111,8 @@ public class LoginState extends BaseAppState {
                                 "Login Successful",
                                 "Welcome, " + username + "!"
                         ));
-                        checkArchive(username); // 检查用户存档
+                        checkArchive(username); // 检查用户存档文件
+                        checkStatus(username); // 检查用户状态文件
 
                         Main.username = username; // 设置当前用户名
 
@@ -141,20 +142,19 @@ public class LoginState extends BaseAppState {
         if (file.exists()) {
             try (Scanner scanner = new Scanner(file)) {
                 while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    String[] parts = line.split(" ");
+                    String line = scanner.nextLine(), parts[] = line.split(" ");
                     if (parts.length == 2 && parts[0].equals(username) && parts[1].equals(password)) return true;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            System.err.println("User list file not found!");
+            throw new IllegalArgumentException("User list file not found!");
         }
         return false; // 用户验证失败
     }
 
-    // 检查用户存档
+    // 检查用户存档文件
     private void checkArchive(String username) {
         File file = new File("archives/" + username + "_archive.txt");
         if (!file.exists()) {
@@ -167,10 +167,29 @@ public class LoginState extends BaseAppState {
         }
     }
 
+    // 检查用户状态文件
+    private void checkStatus(String username) {
+        File file = new File("archives/" + username + "_status.txt");
+        if (!file.exists()) {
+            System.err.println("No status found for user " + username + ". A new status will be created.");
+            try {
+                file.createNewFile();
+                try (FileWriter writer = new FileWriter(file, true)) {
+                    writer.write("0\n");
+                    for (int i = 0; i < LevelSelectionState.LEVEL_COUNT; i++) writer.append(Main.UNSOLVED);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Failed to write to status file of user " + username);
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Failed to create status file for user " + username);
+            }
+        }
+    }
+
     @Override
     public void onEnable() {
         initGui(); // 初始化 GUI
-        initInput(); // 初始化输入
+        initInput(); // 初始化输入监听
     }
 
     @Override

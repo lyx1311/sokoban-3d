@@ -13,13 +13,21 @@ import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.ui.Picture;
 
+import java.io.*;
+import java.util.Scanner;
 
 public class Main extends SimpleApplication {
+    public static final int SOLVER_COST = 150;
+    public static final int SOLVE_GAIN = 100;
+    public static final char UNSOLVED = '0';
+    public static final char SOLVED = '1';
+    public static final char SOLVER_BOUGHT = '2';
+
+    private static Main app;
     public static String username = "";
-    //public Icon icon = new ImageIcon("menuicon.ico");
 
     public static void main(String[] args) {
-        Main app = new Main();
+        app = new Main();
 
         // 设置 AppSettings
         AppSettings settings = new AppSettings(true);
@@ -56,10 +64,20 @@ public class Main extends SimpleApplication {
         setDisplayStatView(false);
     }
 
+    @Override
+    public void simpleUpdate(float tpf) {
+        if (cubeGeo != null) {
+            // 旋转速度：每秒 90°
+            float speed = FastMath.HALF_PI;
+            // 让方块匀速旋转
+            cubeGeo.rotate(0, tpf * speed, 0);
+        }
+    }
+
     private static Geometry cubeGeo;
     private static DirectionalLight cubeLight;
     public static void createBackground(Application app) {
-        Mesh cube = new Box((float) 3/2, (float) 3/2, (float) 3/2);
+        Mesh cube = new Box(1.5f, 1.5f, 1.5f);
         cubeGeo = new Geometry("Cube", cube);
         ((SimpleApplication) app).getRootNode().attachChild(cubeGeo);
         Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
@@ -86,17 +104,58 @@ public class Main extends SimpleApplication {
         }
     }
 
-    @Override
-    public void simpleUpdate(float tpf) {
-        if (cubeGeo != null) {
-            // 旋转速度：每秒 90°
-            float speed = FastMath.HALF_PI;
-            // 让方块匀速旋转
-            cubeGeo.rotate(0, tpf * speed, 0);
+    public static int getMoney() {
+        File file = new File("archives/" + username + "_status.txt");
+        try (Scanner sc = new Scanner(file)) {
+            return sc.nextInt();
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("Status file of user " + username + " not found!");
+        }
+    }
+    private static String getStatus() {
+        File file = new File("archives/" + username + "_status.txt");
+        try (Scanner sc = new Scanner(file)) {
+            sc.nextInt();
+            return sc.next();
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("Status file of user " + username + " not found!");
+        }
+    }
+    public static boolean buySolver(int level) {
+        int money = getMoney();
+        String status = getStatus();
+        if (money >= SOLVER_COST) {
+            File file = new File("archives/" + username + "_status.txt");
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                status = status.substring(0, level - 1) + SOLVER_BOUGHT + status.substring(level);
+                writer.write(money - SOLVER_COST + "\n" + status);
+                app.getStateManager().attach(new AlertState(
+                        "Solver Bought",
+                        "Successfully bought the solver for level " + level + " at the cost of $" + SOLVER_COST + "."
+                ));
+                return true;
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Failed to write to status file of user " + username);
+            }
+        } else {
+            return false;
+        }
+    }
+    public static char getLevelStatus(int level) { return getStatus().charAt(level - 1); }
+    public static void solveLevel(int level) {
+        int money = getMoney();
+        String status = getStatus();
+        File file = new File("archives/" + username + "_status.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            status = status.substring(0, level - 1) + SOLVED + status.substring(level);
+            writer.write(money + SOLVE_GAIN + "\n" +status);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to write to status file of user " + username);
         }
     }
 
     public static boolean inPicture(Picture p, float x, float y) {
+        if (p == null) return false;
         float width = p.getWidth();
         float height = p.getHeight();
         float x1 = p.getLocalTranslation().x;
