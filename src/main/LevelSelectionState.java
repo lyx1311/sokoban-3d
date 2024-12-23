@@ -59,8 +59,8 @@ public class LevelSelectionState extends BaseAppState {
                 // 检查点击位置是否在图片范围内
                 if (Main.inPicture(settings, x, y)) {
                     Main.playClickSound();
-                    getStateManager().detach(LevelSelectionState.this); // 移除当前状态
-                    getStateManager().attach(new SettingState()); // 切换到登
+                    getStateManager().detach(LevelSelectionState.this);
+                    getStateManager().attach(new SettingState());
                 } else if (Main.inPicture(back, x, y)) {
                     Main.playClickSound();
                     getStateManager().detach(LevelSelectionState.this);
@@ -140,7 +140,6 @@ public class LevelSelectionState extends BaseAppState {
             });
         }
         levelSelectionForm.setLocalTranslation(10, app.getCamera().getHeight() - 200, 0); // 设置窗口位置
-
 
         /*backButton = new Button("Log Out and Back");
         backButton.setFontSize(24);

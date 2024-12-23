@@ -139,16 +139,19 @@ public class Main extends SimpleApplication {
     public static int getMoney() {
         File file = new File("archives/" + username + "_status.txt");
         try (Scanner sc = new Scanner(file)) {
-            return sc.nextInt();
+            int money = sc.nextInt();
+            sc.close();
+            return money;
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException("Status file of user " + username + " not found!");
         }
     }
     public static void addMoney() {
         int money = getMoney();
+        String status = getStatus();
         File file = new File("archives/" + username + "_status.txt");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write(money + 1 + "\n" + getStatus());
+            writer.write(money + 1 + "\n" + status);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to write to status file of user " + username);
         }
@@ -161,7 +164,9 @@ public class Main extends SimpleApplication {
         File file = new File("archives/" + username + "_status.txt");
         try (Scanner sc = new Scanner(file)) {
             sc.nextInt();
-            return sc.next();
+            String status = sc.next();
+            sc.close();
+            return status;
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException("Status file of user " + username + " not found!");
         }
