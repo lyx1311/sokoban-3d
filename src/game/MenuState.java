@@ -86,7 +86,7 @@ public class MenuState extends BaseAppState {
                         return;
                     }
 
-                    if (Main.getLevelStatus(level) != Main.SOLVER_BOUGHT && !Main.buySolver(level)) {
+                    if (Main.getLevelStatus(level) == Main.UNSOLVED && !Main.buySolver(level)) {
                         getStateManager().attach(new AlertState(
                                 "Not Enough Money :(",
                                 "Please solve the level to get $" + Main.SOLVE_GAIN + "!"
@@ -255,8 +255,8 @@ public class MenuState extends BaseAppState {
         walletHint1.setFontSize(20);
 
         Label walletHint2 = wallet.addChild(new Label(Main.getLevelStatus(level) == Main.SOLVER_BOUGHT ?
-                "You've bought the solver!" :
-                "Buy a solver for $" + Main.SOLVER_COST + "!"
+                "You've bought the solver!" : Main.getLevelStatus(level) == Main.UNSOLVED ?
+                "Buy a solver for $" + Main.SOLVER_COST + "!" : "You've solved it, so solver is free!"
         ));
         walletHint2.setColor(new ColorRGBA(1, 1, 1, 1));
         walletHint2.setFontSize(20);
