@@ -63,7 +63,7 @@ public class CubeState extends BaseAppState {
     private HashSet<Integer> goals = new HashSet<>();
     private String steps = new String();
     private boolean isWin = false, isTimeOut = false;
-    private float sunsetTime = 90f, timeElapsed = 0f;
+    private float sunsetTime = 60f, timeElapsed = 0f;
 
     public CubeState(int level) { this.level = level; }
 

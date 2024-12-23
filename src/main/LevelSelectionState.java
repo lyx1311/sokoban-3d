@@ -6,6 +6,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.ui.Picture;
@@ -112,7 +113,23 @@ public class LevelSelectionState extends BaseAppState {
             Button levelButton = levelSelectionForm.addChild(new Button("Level " + i + "        "),
                     (i - 1) / 3, (i - 1) % 3);
             levelButton.setFontSize(40);
-            levelButton.setColor(new com.jme3.math.ColorRGBA(1, 1, 1, 1));
+
+            if (Main.username.equals("Visitor")) {
+                levelButton.setColor(new ColorRGBA(1, 1, 1, 1));
+            } else {
+                switch (Main.getLevelStatus(i)) {
+                    case Main.SOLVED:
+                        levelButton.setColor(new ColorRGBA(0, 1, 0, 1));
+                        break;
+                    case Main.SOLVER_BOUGHT:
+                        levelButton.setColor(new ColorRGBA(0, 1, 0.5f, 1));
+                        break;
+                    default:
+                        levelButton.setColor(new ColorRGBA(0.5f, 0.5f, 0.5f, 1));
+                        break;
+                }
+            }
+
             final int level = i;
             levelButton.addClickCommands(source -> {
                 Main.playClickSound();
