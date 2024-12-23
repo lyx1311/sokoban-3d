@@ -417,7 +417,7 @@ public class CubeState extends BaseAppState {
 
         isWin = true;
         Main.playWinSound();
-        if (Main.getLevelStatus(level) == Main.UNSOLVED) Main.solveLevel(level);
+        if (!Main.username.equals("Visitor") && Main.getLevelStatus(level) == Main.UNSOLVED) Main.solveLevel(level);
     }
 
     private boolean checkDeadlock() {
