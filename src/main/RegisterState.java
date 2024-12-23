@@ -114,6 +114,7 @@ public class RegisterState extends BaseAppState {
 
                 // 检查点击位置是否在图片范围内
                 if (Main.inPicture(registerPicture, x, y)) {
+                    Main.playClickSound();
                     username = usernameField.getText().trim();
                     password = passwordField.getText();
                     confirmPassword = confirmPasswordField.getText();
@@ -171,6 +172,7 @@ public class RegisterState extends BaseAppState {
                     onDisable();
                     onEnable();
                 } else if (Main.inPicture(backPicture, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(RegisterState.this);
                     getStateManager().attach(new MainMenuState()); // 返回主菜单
                 }

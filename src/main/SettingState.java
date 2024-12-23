@@ -61,6 +61,7 @@ public class SettingState extends BaseAppState {
 
                 // 检查点击位置是否在图片范围内
                 if (Main.inPicture(back, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(SettingState.this); // 移除当前状态
                     getStateManager().attach(new LevelSelectionState()); // 切换到登
                 }
@@ -102,14 +103,15 @@ public class SettingState extends BaseAppState {
         guiNode.attachChild(back);
 
         // 移动速度设置
-       moveSpeedLabel=settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
-               " seconds per move"));
-       moveSpeedLabel.setFontSize(24);
-       moveSpeedLabel.setColor(ColorRGBA.White);
+        moveSpeedLabel=settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
+                " seconds per move"));
+        moveSpeedLabel.setFontSize(24);
+        moveSpeedLabel.setColor(ColorRGBA.White);
         Slider moveSpeedSlider = settingForm.addChild(new Slider(new DefaultRangedValueModel(0.1f, 1.5f,
                 moveSpeed)), 1);
         setStyle(moveSpeedSlider, 0.1f);
         addButton(settingForm).addClickCommands(source -> {
+            Main.playClickSound();
             moveSpeed = Math.round(moveSpeedSlider.getModel().getValue() * 100) / 100.0f;
 
             onDisable();
@@ -125,6 +127,7 @@ public class SettingState extends BaseAppState {
                 rotateSpeed)), 1);
         setStyle(rotateSpeedSlider, 0.1f);
         addButton(settingForm).addClickCommands(source -> {
+            Main.playClickSound();
             rotateSpeed = Math.round(rotateSpeedSlider.getModel().getValue() * 100) / 100.0f;
 
             onDisable();
@@ -140,6 +143,7 @@ public class SettingState extends BaseAppState {
                 solverTimeLimit)), 1);
         setStyle(solverTimeLimitSlider, 1.0f);
         addButton(settingForm).addClickCommands(source -> {
+            Main.playClickSound();
             solverTimeLimit = (int) Math.round(solverTimeLimitSlider.getModel().getValue());
 
             onDisable();
@@ -160,7 +164,7 @@ public class SettingState extends BaseAppState {
     }
 
     private Button addButton(Container container) {
-        apply=container.addChild(new Button("Apply"), 2);
+        apply = container.addChild(new Button("Apply"), 2);
         apply.setColor(ColorRGBA.White);
         apply.setFontSize(24);
         return apply;
@@ -190,6 +194,5 @@ public class SettingState extends BaseAppState {
     }
 
     @Override
-    protected void cleanup(Application app) {
-    }
+    protected void cleanup(Application app) {}
 }

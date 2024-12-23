@@ -396,6 +396,7 @@ public class CubeState extends BaseAppState {
         // 检查胜利并存档
         steps += Character.toUpperCase(dirToChar(direction));
         if (showAnimation) {
+            Main.playPushSound();
             checkWin();
             checkDeadlock();
         }
@@ -415,7 +416,7 @@ public class CubeState extends BaseAppState {
         ));
 
         isWin = true;
-
+        Main.playWinSound();
         if (Main.getLevelStatus(level) == Main.UNSOLVED) Main.solveLevel(level);
     }
 
@@ -772,6 +773,7 @@ public class CubeState extends BaseAppState {
         // 检查是否达到太阳落山时间
         if (timeElapsed >= sunsetTime && !isTimeOut) {
             isTimeOut = true;
+            Main.playLoseSound();
             getStateManager().attach(new AlertState(
                     "Time Is Up",
                     "You have run out of time, so no reward for you. Please try again."

@@ -3,6 +3,7 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.audio.AudioNode;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
@@ -29,6 +30,7 @@ public class MenuState extends BaseAppState {
     private Container menu, wallet;
     private Label stepsLabel, timeLabel;
     private Picture help, solve, restart, back, close, load, save;
+    private AudioNode backgroundMusic;
 
     public MenuState(GameState gameState, CubeState cubeState, int level) {
         this.gameState = gameState;
@@ -66,12 +68,14 @@ public class MenuState extends BaseAppState {
                 float y = app.getInputManager().getCursorPosition().y;
 
                 if (Main.inPicture(help, x, y)) {
+                    Main.playClickSound();
                     if (checkSolverWorking()) return;
                     if (checkWorking()) return;
 
                     gameState.closeMenu();
                     gameState.openHelp();
-                } else if (Main.inPicture(solve, x, y)) {
+                } else if (!Main.username.equals("Visitor") && Main.inPicture(solve, x, y)) {
+                    Main.playClickSound();
                     if (checkSolverWorking()) return;
 
                     if (cubeState.isWin()) {
@@ -100,21 +104,25 @@ public class MenuState extends BaseAppState {
 
                     gameState.closeMenu();
                 } else if (Main.inPicture(restart, x, y)) {
+                    Main.playClickSound();
                     if (checkSolverWorking()) return;
                     if (checkWorking()) return;
 
                     cubeState.restart();
                     gameState.closeMenu();
                 } else if (!Main.username.equals("Visitor") && Main.inPicture(load, x, y)) {
+                    Main.playClickSound();
                     if (checkSolverWorking()) return;
                     if (checkWorking()) return;
                     if (cubeState.load()) gameState.closeMenu();
                 } else if (!Main.username.equals("Visitor") && Main.inPicture(save, x, y)) {
+                    Main.playClickSound();
                     if (checkSolverWorking()) return;
                     if (checkWorking()) return;
                     cubeState.save();
                     gameState.closeMenu();
                 } else if (Main.inPicture(back, x, y)) {
+                    Main.playClickSound();
                     if (checkSolverWorking()) return;
                     if (checkWorking()) return;
 
@@ -126,6 +134,7 @@ public class MenuState extends BaseAppState {
 
                     Main.createBackground(app); // 创建背景图片
                 } else if (Main.inPicture(close, x, y)) {
+                    Main.playClickSound();
                     gameState.closeMenu();
                 }
             }
@@ -238,7 +247,10 @@ public class MenuState extends BaseAppState {
         walletMoney.setColor(new ColorRGBA(1, 1, 1, 1));
         walletMoney.setFontSize(32);
 
-        Label walletHint1 = wallet.addChild(new Label("Solve the level in time to get $" + Main.SOLVE_GAIN + "!"));
+        Label walletHint1 = wallet.addChild(new Label(Main.getLevelStatus(level) == Main.UNSOLVED ?
+                "Solve the level in time to get $" + Main.SOLVE_GAIN + "!" :
+                "You've solved the level!"
+        ));
         walletHint1.setColor(new ColorRGBA(1, 1, 1, 1));
         walletHint1.setFontSize(20);
 

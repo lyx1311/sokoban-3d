@@ -103,6 +103,7 @@ public class LoginState extends BaseAppState {
 
                 // 检查点击位置是否在图片范围内
                 if (Main.inPicture(logInPicture, x, y)) {
+                    Main.playClickSound();
                     username = usernameField.getText().trim();
                     password = passwordField.getText();
 
@@ -129,6 +130,7 @@ public class LoginState extends BaseAppState {
                     onDisable();
                     onEnable();
                 } else if (Main.inPicture(backPicture, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(LoginState.this); // 移除当前状态
                     getStateManager().attach(new MainMenuState()); // 返回主菜单
                 }
@@ -194,8 +196,8 @@ public class LoginState extends BaseAppState {
 
     @Override
     public void onDisable() {
-        ((GuiControl) usernameField.getControl(GuiControl.class)).focusLost();
-        ((GuiControl) passwordField.getControl(GuiControl.class)).focusLost();
+        usernameField.getControl(GuiControl.class).focusLost();
+        passwordField.getControl(GuiControl.class).focusLost();
 
         loginForm.detachAllChildren(); // 移除表单的所有子节点
         loginForm.removeFromParent(); // 将表单从 GUI 节点移除

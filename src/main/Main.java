@@ -2,6 +2,7 @@ package main;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.audio.AudioNode;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.FastMath;
@@ -76,6 +77,7 @@ public class Main extends SimpleApplication {
 
     private static Geometry cubeGeo;
     private static DirectionalLight cubeLight;
+    private static AudioNode backgroundMusic;
     public static void createBackground(Application app) {
         Mesh cube = new Box(1.5f, 1.5f, 1.5f);
         cubeGeo = new Geometry("Cube", cube);
@@ -88,6 +90,13 @@ public class Main extends SimpleApplication {
         ((SimpleApplication) app).getRootNode().addLight(cubeLight);
         app.getCamera().setLocation(new Vector3f(2.78f, 4.98f, 7.19f));
         app.getCamera().setRotation(new Quaternion(-0.08f, 0.92f, -0.27f, -0.26f));
+
+        if (backgroundMusic != null) backgroundMusic.stop();
+
+        backgroundMusic = new AudioNode(app.getAssetManager(), "sounds/Grasswalk.wav", false);
+        backgroundMusic.setPositional(false);
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
     }
     public static void removeBackground(Application app) {
         if (cubeGeo != null) {
@@ -102,6 +111,28 @@ public class Main extends SimpleApplication {
         } else {
             throw new IllegalStateException("Background not found");
         }
+
+        if (backgroundMusic != null) {
+            backgroundMusic.stop();
+
+            backgroundMusic = new AudioNode(app.getAssetManager(), "sounds/Riddle.wav", false);
+            backgroundMusic.setPositional(false);
+            backgroundMusic.setLooping(true);
+            backgroundMusic.play();
+        } else {
+            throw new IllegalStateException("Background music not found");
+        }
+    }
+
+    public static void playClickSound() { playSound("sounds/Click.wav"); }
+    public static void playWinSound() { playSound("sounds/Win.wav"); }
+    public static void playLoseSound() { playSound("sounds/Lose.wav"); }
+    public static void playPushSound() { playSound("sounds/Push.wav"); }
+    private static void playSound(String sound) {
+        AudioNode audio = new AudioNode(app.getAssetManager(), sound, false);
+        audio.setPositional(false);
+        audio.setLooping(false);
+        audio.play();
     }
 
     public static int getMoney() {

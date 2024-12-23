@@ -7,10 +7,10 @@ import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
 import com.jme3.scene.Node;
 import com.jme3.ui.Picture;
-import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.BaseStyles;
+
+import main.Main;
 
 public class HelpState extends BaseAppState {
     private static final int TOTAL_LABELS = 5;
@@ -61,6 +61,7 @@ public class HelpState extends BaseAppState {
                 @Override
                 public void onMouseButtonEvent(com.jme3.input.event.MouseButtonEvent evt) {
                     if (evt.isPressed()) {
+                        Main.playClickSound();
                         pictures[currentLabel].removeFromParent();
                         if (currentLabel < TOTAL_LABELS - 1) {
                             currentLabel++;

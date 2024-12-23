@@ -73,12 +73,15 @@ public class MainMenuState extends BaseAppState {
 
                 // 检查点击位置是否在图片范围内
                 if (Main.inPicture(logInPicture, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(MainMenuState.this); // 移除当前状态
                     getStateManager().attach(new LoginState()); // 切换到登
                 } else if (Main.inPicture(registerPicture, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(MainMenuState.this);
                     getStateManager().attach(new RegisterState());
                 } else if (Main.inPicture(visitorPicture, x, y)) {
+                    Main.playClickSound();
                     Main.username = "Visitor";
                     getStateManager().detach(MainMenuState.this);
                     getStateManager().attach(new LevelSelectionState());

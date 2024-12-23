@@ -57,9 +57,11 @@ public class LevelSelectionState extends BaseAppState {
 
                 // 检查点击位置是否在图片范围内
                 if (Main.inPicture(settings, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(LevelSelectionState.this); // 移除当前状态
                     getStateManager().attach(new SettingState()); // 切换到登
                 } else if (Main.inPicture(back, x, y)) {
+                    Main.playClickSound();
                     getStateManager().detach(LevelSelectionState.this);
                     getStateManager().attach(new MainMenuState());
                 }
@@ -113,6 +115,7 @@ public class LevelSelectionState extends BaseAppState {
             levelButton.setColor(new com.jme3.math.ColorRGBA(1, 1, 1, 1));
             final int level = i;
             levelButton.addClickCommands(source -> {
+                Main.playClickSound();
                 Main.removeBackground(app); // 移除背景图片
 
                 getStateManager().detach(this); // 移除当前状态
