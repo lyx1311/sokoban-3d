@@ -156,7 +156,7 @@ public class Main extends SimpleApplication {
             throw new IllegalArgumentException("Failed to write to status file of user " + username);
         }
         app.getStateManager().attach(new AlertState(
-                "Money Collected",
+                "Thank You for Your Support :)",
                 "Collected $1. You now have $" + (money + 1) + "."
         ));
     }

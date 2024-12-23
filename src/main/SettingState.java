@@ -83,7 +83,7 @@ public class SettingState extends BaseAppState {
         settings.setImage(app.getAssetManager(), "buttonsettings.png", true);
         settings.setWidth(263);
         settings.setHeight(70);
-        settings.setLocalTranslation(12, app.getCamera().getHeight()-80 , 0);
+        settings.setLocalTranslation(12, app.getCamera().getHeight() - 80, 0);
         guiNode.attachChild(settings);
 
         // 添加设置表单
@@ -109,11 +109,11 @@ public class SettingState extends BaseAppState {
         about.setImage(app.getAssetManager(), "announcement.png", true);
         about.setWidth(561);
         about.setHeight(169);
-        about.setLocalTranslation(20, app.getCamera().getHeight() - 700 , 0);
+        about.setLocalTranslation(20, app.getCamera().getHeight() - 500 , 0);
         guiNode.attachChild(about);
 
         // 移动速度设置
-        moveSpeedLabel=settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
+        moveSpeedLabel = settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
                 " seconds per move"));
         moveSpeedLabel.setFontSize(24);
         moveSpeedLabel.setColor(ColorRGBA.White);
