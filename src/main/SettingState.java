@@ -107,8 +107,8 @@ public class SettingState extends BaseAppState {
 
         about = new Picture("about");
         about.setImage(app.getAssetManager(), "announcement.png", true);
-        about.setWidth(535);
-        about.setHeight(214);
+        about.setWidth(561);
+        about.setHeight(169);
         about.setLocalTranslation(20, app.getCamera().getHeight() - 700 , 0);
         guiNode.attachChild(about);
 
