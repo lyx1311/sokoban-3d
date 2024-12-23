@@ -125,6 +125,7 @@ public class Main extends SimpleApplication {
     }
 
     public static void playClickSound() { playSound("sounds/Click.wav"); }
+    public static void playCollectSound() { playSound("sounds/Collect.wav"); }
     public static void playWinSound() { playSound("sounds/Win.wav"); }
     public static void playLoseSound() { playSound("sounds/Lose.wav"); }
     public static void playPushSound() { playSound("sounds/Push.wav"); }
@@ -142,6 +143,19 @@ public class Main extends SimpleApplication {
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException("Status file of user " + username + " not found!");
         }
+    }
+    public static void addMoney() {
+        int money = getMoney();
+        File file = new File("archives/" + username + "_status.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write(money + 1 + "\n" + getStatus());
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to write to status file of user " + username);
+        }
+        app.getStateManager().attach(new AlertState(
+                "Money Collected",
+                "Collected $1. You now have $" + (money + 1) + "."
+        ));
     }
     private static String getStatus() {
         File file = new File("archives/" + username + "_status.txt");

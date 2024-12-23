@@ -22,7 +22,7 @@ public class SettingState extends BaseAppState {
     private Application app;
     private Node guiNode;
     private Container container;
-    private Picture back,settings;
+    private Picture back, about, settings;
     private Label moveSpeedLabel, rotateSpeedLabel, solverTimeLimitLabel;
     private Button apply;
 
@@ -64,6 +64,9 @@ public class SettingState extends BaseAppState {
                     Main.playClickSound();
                     getStateManager().detach(SettingState.this); // 移除当前状态
                     getStateManager().attach(new LevelSelectionState()); // 切换到登
+                } else if (Main.inPicture(about, x, y) && !Main.username.equals("Visitor")) {
+                    Main.playCollectSound();
+                    Main.addMoney();
                 }
             }
         }
@@ -101,6 +104,13 @@ public class SettingState extends BaseAppState {
         back.setHeight(60);
         back.setLocalTranslation(20, app.getCamera().getHeight() - 300 , 0);
         guiNode.attachChild(back);
+
+        about = new Picture("about");
+        about.setImage(app.getAssetManager(), "announcement.png", true);
+        about.setWidth(535);
+        about.setHeight(214);
+        about.setLocalTranslation(20, app.getCamera().getHeight() - 700 , 0);
+        guiNode.attachChild(about);
 
         // 移动速度设置
         moveSpeedLabel=settingForm.addChild(new Label("Move Speed: " + String.format("%.2f", moveSpeed) +
@@ -188,6 +198,7 @@ public class SettingState extends BaseAppState {
             }
         }
         back.removeFromParent();
+        about.removeFromParent();
         settings.removeFromParent();
         container.detachAllChildren(); // 移除所有子节点
         container.removeFromParent(); // 将菜单从 GUI 节点移除
