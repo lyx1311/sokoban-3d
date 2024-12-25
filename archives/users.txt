@@ -1,3 +1,1 @@
 testuser1 zxcvbnm,./
-testuser2 zxcvbnm,./
-monkey zxcvbnm,./
