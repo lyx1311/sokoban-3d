@@ -24,7 +24,7 @@
 1. **克隆仓库**  
    打开 [Git Bash](https://git-scm.com/downloads) 并运行以下命令以克隆项目代码：
    
-   ```markdown
+   ```bash
    git clone https://github.com/lyx1311/sokoban-3d.git
    cd sokoban-3d
    ```
@@ -43,8 +43,7 @@
    gradlew.bat run
    ```
 
-4. **启动界面**  
-   游戏启动后，您将进入主菜单，可以选择关卡并开始游戏。
+其它操作系统同理。
 
 ## 项目结构
 
