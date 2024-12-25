@@ -19,31 +19,31 @@
 
 ## 快速开始
 
-以下是运行项目的简单步骤：
+以下是 Windows 上运行项目的简单步骤：
 
-1. **克隆仓库**
-   打开终端并运行以下命令以克隆项目代码：
+1. **克隆仓库**  
+   打开 [Git Bash](https://git-scm.com/downloads) 并运行以下命令以克隆项目代码：
    
    ```markdown
    git clone https://github.com/lyx1311/sokoban-3d.git
    cd sokoban-3d
    ```
 
-2. **构建项目**
-   使用 Gradle 构建项目。下以 Windows 为例：
+2. **构建项目**  
+   使用 Gradle 构建项目：
    
    ```bash
    gradlew.bat clean build
    ```
 
-3. **运行游戏**
+3. **运行游戏**  
    构建完成后，通过以下命令运行游戏：
    
    ```bash
    gradlew.bat run
    ```
 
-4. **启动界面**
+4. **启动界面**  
    游戏启动后，您将进入主菜单，可以选择关卡并开始游戏。
 
 ## 项目结构
@@ -63,7 +63,7 @@
 
 想了解 jME3？推荐阅读 [jME3 中文版教程](https://github.com/jmecn/tutorial-for-beginners) 并自行尝试！本项目只实现了其中一点小小小功能……
 
-若对项目中任何地方有疑问，欢迎和我交流；若在学习 jME3 时遇到困难，更推荐在 [jME 论坛](https://hub.jmonkeyengine.org/) 上直接发帖求助！
+若对项目中任何地方有疑问，欢迎和我交流；若在学习 jME3 时遇到困难，推荐在 [jME 论坛](https://hub.jmonkeyengine.org/) 上直接发帖求助！
 
 如果您喜欢这个项目，希望您为仓库点亮 ⭐ Star！
 
